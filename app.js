@@ -1,11 +1,14 @@
 const express = require('express');
 const path = require('path');
+const {connectDb}  = require('./config/pg');
 const PORT = 3000;
 
 const app = express();
 const routes = require('./routes/shopeRoutes');
 
-function startServer() {
+async function startServer() {
+
+    await connectDb();
 
     app.use(express.urlencoded({extended:true}));
     app.use(express.static(path.join(__dirname,'public')));

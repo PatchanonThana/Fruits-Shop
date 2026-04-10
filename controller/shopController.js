@@ -10,3 +10,25 @@ exports.showShopPage = async (req, res) => {
         }
     }))
 }
+
+exports.login = async (req,res) => {
+    const {username,password} = req.body;
+    const user = await model.findByUsernameAndPassword(username,password);
+
+    if (!user) {
+        return res.status(401).json({error:"Invalid username or password"})
+    }
+
+    req.session.user = {
+        username:user.username
+    }
+
+    res.json({
+        message:"Login Success",
+        session:req.session.user
+    })
+}
+
+exports.showLoginPage = (req,res) => {
+    res.json({messasge:"This Is Login Page!"})
+}

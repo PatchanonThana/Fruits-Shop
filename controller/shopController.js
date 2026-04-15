@@ -1,7 +1,7 @@
 const model = require('../model/shopModel');
 
 exports.showLoginPage = (req,res) => {
-    res.json({messasge:"This Is Login Page!"})
+    return res.json({messasge:"This Is Login Page!"})
 }
 
 exports.login = async (req,res) => {
@@ -17,13 +17,17 @@ exports.login = async (req,res) => {
         username:user.username
     }
 
-    res.json({
+    return res.json({
         message:"Login Success",
         session:req.session.user
     })
 }
 
 exports.showShopPage = async (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect('/login-page');
+    }
     const fruits = await model.Fruit.findAllfruits();
     return res.json(fruits.map(fruit => {
         return {
@@ -35,6 +39,10 @@ exports.showShopPage = async (req, res) => {
 }
 
 exports.showFruit = async (req,res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect('/login-page');
+    }
     const fruit_id = Number(req.params.id); 
     const fruit_info = await model.Fruit.findFruitById(fruit_id);
     if (!fruit_info || Object.keys(fruit_info).length <= 0) {
@@ -63,14 +71,14 @@ exports.showCartPage = async (req,res) => {
         uesr_id:user.user_id,
         cart:fruitDetail
     }
-    res.json(cart)
+    return res.json(cart)
 }
 
 exports.addCart = async (req,res) => {
     try {
         const user = req.session.user;
         if (!user) {
-            res.redirect('/login-page')
+            return res.redirect('/login-page')
         }
 
         const {user_id,fruit_id,quantity} = req.body;
@@ -78,11 +86,11 @@ exports.addCart = async (req,res) => {
 
         if (checker.length > 0) {
             await model.Cart.updateCart(user_id,fruit_id,quantity);
-            res.status(200).json({message:"Update Cart Success"})
+            return res.status(200).json({message:"Update Cart Success"})
         }
         else {
             await model.Cart.addCart(user_id,fruit_id,quantity);
-            res.status(201).json({message:"Add new item Success"})
+            return res.status(201).json({message:"Add new item Success"})
         }
     }
     catch (err) {

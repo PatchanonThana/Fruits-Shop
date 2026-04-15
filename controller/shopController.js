@@ -24,6 +24,10 @@ exports.login = async (req,res) => {
 }
 
 exports.showShopPage = async (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect('/login-page');
+    }
     const fruits = await model.Fruit.findAllfruits();
     return res.json(fruits.map(fruit => {
         return {
@@ -35,6 +39,10 @@ exports.showShopPage = async (req, res) => {
 }
 
 exports.showFruit = async (req,res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect('/login-page');
+    }
     const fruit_id = Number(req.params.id); 
     const fruit_info = await model.Fruit.findFruitById(fruit_id);
     if (!fruit_info || Object.keys(fruit_info).length <= 0) {

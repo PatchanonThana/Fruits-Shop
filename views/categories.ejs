@@ -1,0 +1,138 @@
+<%- include('partials/header', { title: 'Categories' }) %>
+<%- include('partials/navbar', { activePage: 'categories' }) %>
+
+<%
+    // ============================================
+    // PRE-BUILD all dynamic values in JS
+    // This prevents IDE linter errors with EJS inside style=""
+    // ============================================
+
+    // Color map for product card backgrounds
+    const categoryColors = {
+        sweet_fruit:   { from: 'rgba(255, 181, 194, 0.25)', to: 'rgba(255, 181, 194, 0.08)' },
+        sour_fruit:    { from: 'rgba(184, 233, 134, 0.25)', to: 'rgba(184, 233, 134, 0.08)' },
+        healthy_fruit: { from: 'rgba(126, 200, 227, 0.25)', to: 'rgba(126, 200, 227, 0.08)' },
+        juice_fruit:   { from: 'rgba(255, 215, 0, 0.25)',   to: 'rgba(255, 215, 0, 0.08)' },
+        other_dish:    { from: 'rgba(221, 160, 221, 0.25)', to: 'rgba(221, 160, 221, 0.08)' }
+    };
+
+    // Tag labels for each category
+    const categoryTags = {
+        sweet_fruit:   '🍑 Sweet',
+        sour_fruit:    '🍋 Sour',
+        healthy_fruit: '🥝 Healthy',
+        juice_fruit:   '🧃 Juice',
+        other_dish:    '🍨 Dish'
+    };
+
+    // Find active category info
+    const activeCat = categories.find(c => c.slug === activeCategory) || categories;
+
+    // Count items per category for banner display
+    function getCategoryCount(slug) {
+        if (slug === 'all') return allFruits.length;
+        // We need all fruits from app.locals for counting
+        return allFruits.length;
+    }
+%>
+
+<div class="categories-page">
+    <div class="categories-page-container">
+
+        <!-- ==================== HEADER ==================== -->
+        <div class="categories-page-header animate-in">
+            <h1 class="section-title" style="display: block; text-align: center;">🍉 Our Categories</h1>
+            <p>Explore our fresh fruit collection — <%= allFruits.length %> items handpicked just for you!</p>
+        </div>
+
+        <!-- ==================== CATEGORY BANNER CARDS ==================== -->
+        <div class="category-banners animate-in">
+            <% categories.forEach(function(cat) { %>
+                <%
+                    // Build style string in JS block
+                    const bannerStyle = 'background: linear-gradient(135deg, ' + cat.color + '55, ' + cat.color + '22)';
+                    const bannerActiveClass = (activeCategory === cat.slug) ? 'banner-active' : '';
+                    const bannerClass = 'category-banner-card ' + bannerActiveClass;
+                %>
+                <a href="/categories?cat=<%= cat.slug %>" class="<%- bannerClass %>" style="<%- bannerStyle %>">
+                    <img src="/images/<%= cat.image %>" alt="<%= cat.name %>">
+                    <h3><%= cat.emoji %> <%= cat.name %></h3>
+                </a>
+            <% }); %>
+        </div>
+
+        <!-- ==================== CATEGORY TABS ==================== -->
+        <div class="category-tabs">
+            <% categories.forEach(function(cat) { %>
+                <%
+                    const tabClass = (activeCategory === cat.slug) ? 'category-tab active' : 'category-tab';
+                %>
+                <a href="/categories?cat=<%= cat.slug %>" class="<%- tabClass %>">
+                    <%= cat.emoji %> <%= cat.name %>
+                </a>
+            <% }); %>
+        </div>
+
+        <!-- ==================== ACTIVE CATEGORY INFO ==================== -->
+        <div class="active-category-header animate-in">
+            <h3 class="products-grid-title"><%= activeCat.emoji %> <%= activeCat.name %></h3>
+            <p class="active-category-desc"><%= activeCat.desc %></p>
+            <span class="product-count-badge"><%= allFruits.length %> items</span>
+        </div>
+
+        <!-- ==================== PRODUCTS GRID ==================== -->
+        <div class="products-grid animate-in">
+            <% allFruits.forEach(function(fruit, index) { %>
+                <%
+                    // Build card background style
+                    const colors = categoryColors[fruit.category] || categoryColors.other_dish;
+                    const cardStyle = 'background: linear-gradient(135deg, ' + colors.from + ', ' + colors.to + ')';
+
+                    // Get category tag text
+                    const tagText = categoryTags[fruit.category] || '🍨 Dish';
+
+                    // Badge info
+                    let badgeHTML = '';
+                    if (index === 0) {
+                        badgeHTML = '<span class="product-badge">🔥 HOT</span>';
+                    } else if (index === 1) {
+                        badgeHTML = '<span class="product-badge" style="background:linear-gradient(135deg,#FFD93D,#F39C12)">⭐ POPULAR</span>';
+                    } else if (index === 2) {
+                        badgeHTML = '<span class="product-badge" style="background:linear-gradient(135deg,#a29bfe,#6c5ce7)">✨ NEW</span>';
+                    }
+                %>
+                <div class="product-card animate-child" data-category="<%= fruit.category %>">
+                    <div class="product-card-image" style="<%- cardStyle %>">
+                        <%- badgeHTML %>
+                        <div class="product-wishlist">🤍</div>
+                        <img src="/images/<%= fruit.image %>" alt="<%= fruit.name %>">
+                    </div>
+                    <div class="product-card-info">
+                        <div class="product-category-tag"><%- tagText %></div>
+                        <h4><%= fruit.name %></h4>
+                        <p class="product-desc"><%= fruit.desc %></p>
+                        <div class="product-card-bottom">
+                            <span class="product-price">฿<%= fruit.price %></span>
+                            <button class="btn-add-cart" title="Add to cart" data-fruit-id="<%= fruit.id %>">
+                                <img src="/images/cart.svg" alt="Add to cart">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
+        <!-- ==================== EMPTY STATE ==================== -->
+        <% if (allFruits.length === 0) { %>
+            <div class="cart-empty">
+                <div class="cart-empty-icon">🔍</div>
+                <h3>No fruits found</h3>
+                <p>Try browsing a different category!</p>
+                <a href="/categories" class="btn-catalog">View All</a>
+            </div>
+        <% } %>
+
+    </div>
+</div>
+
+<%- include('partials/footer') %>

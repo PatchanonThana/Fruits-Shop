@@ -20,15 +20,93 @@ exports.login = async (req,res) => {
     }
 
     req.session.user = {
+        user_id:user.user_id,
         username:user.username
     }
 
-    res.json({
+    return res.json({
         message:"Login Success",
         session:req.session.user
     })
 }
 
+//อันนี้เพิ่มมา
 exports.showLoginPage = (req,res) => {
     res.json({messasge:"This Is Login Page!"})
+}
+
+exports.showShopPage = async (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect('/login-page');
+    }
+    const fruits = await model.Fruit.findAllfruits();
+    return res.json(fruits.map(fruit => {
+        return {
+            specie:fruit.name,
+            price:fruit.price,
+            stock:fruit.stock
+        }
+    }))
+}
+
+exports.showFruit = async (req,res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect('/login-page');
+    }
+    const fruit_id = Number(req.params.id); 
+    const fruit_info = await model.Fruit.findFruitById(fruit_id);
+    if (!fruit_info || Object.keys(fruit_info).length <= 0) {
+        return res.status(400).json({message:`No Such a fruit id: ${fruit_id}`});
+    }
+    return res.json(fruit_info);
+}
+
+exports.showCartPage = async (req,res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect('/login-page')
+    }
+    const userCart = await model.Cart.findUserCart(user.user_id);
+    const fruitDetail = await Promise.all(
+        userCart.map( async cart => {
+            const fruit = await model.Fruit.findFruitById(cart.fruit_id);
+            return {
+                fruit_name:fruit.name,
+                fruit_price:fruit.price,
+                quantity:cart.quantity
+            }
+        })
+    )
+    const cart = {
+        uesr_id:user.user_id,
+        cart:fruitDetail
+    }
+    return res.json(cart)
+}
+
+exports.addCart = async (req,res) => {
+    try {
+        const user = req.session.user;
+        if (!user) {
+            return res.redirect('/login-page')
+        }
+
+        const {user_id,fruit_id,quantity} = req.body;
+        const checker = await model.Cart.checkCart(user_id,fruit_id);
+
+        if (checker.length > 0) {
+            await model.Cart.updateCart(user_id,fruit_id,quantity);
+            return res.status(200).json({message:"Update Cart Success"})
+        }
+        else {
+            await model.Cart.addCart(user_id,fruit_id,quantity);
+            return res.status(201).json({message:"Add new item Success"})
+        }
+    }
+    catch (err) {
+        return res.status(500).json({error:"Something Went wrong please try again"});
+        console.error(err);
+    }
 }

@@ -1,0 +1,36 @@
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/" class="nav-logo">
+            <img src="/images/logo.png" alt="Fruits Shop Logo" class="logo-img">
+        </a>
+        <a href="/" class="nav-brand">Fruit Shop</a>
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="/" class="<%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>">Home</a></li>
+        <li><a href="/categories" class="<%= typeof activePage !== 'undefined' && activePage === 'categories' ? 'active' : '' %>">Categories</a></li>
+        <li><a href="/#bestsellers">Bestsellers</a></li>
+        <li><a href="/#juice">Juice</a></li>
+        <li><a href="/#treats">Treats</a></li>
+        <li><a href="#footer">Contact</a></li>
+    </ul>
+
+    <div class="nav-right">
+        <a href="/cart" class="nav-cart" title="Shopping Cart">
+            <img src="/images/cart.svg" alt="Cart">
+            <span class="cart-badge">4</span>
+        </a>
+        <a href="/login" class="btn-login">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Login
+        </a>
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+</nav>

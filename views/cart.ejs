@@ -1,0 +1,79 @@
+<%- include('partials/header', { title: 'Shopping Cart' }) %>
+<%- include('partials/navbar', { activePage: 'cart' }) %>
+
+<div class="cart-page">
+    <div class="cart-container">
+        <!-- Cart Items -->
+        <div class="cart-items-section">
+            <h2>🛒 Shopping Cart (<%= cartItems.length %> items)</h2>
+
+            <% if(cartItems && cartItems.length > 0) { %>
+                <% cartItems.forEach(item => { %>
+                    <div class="cart-item" data-price="<%= item.price %>">
+                        <div class="cart-item-image">
+                            <img src="/images/<%= item.image %>" alt="<%= item.name %>">
+                        </div>
+                        <div class="cart-item-details">
+                            <h4><%= item.name %></h4>
+                            <p><%= item.desc %></p>
+                            <span class="cart-item-unit-price">฿<%= item.price %> each</span>
+                        </div>
+                        <div class="cart-qty">
+                            <button class="qty-minus">−</button>
+                            <span><%= item.qty %></span>
+                            <button class="qty-plus">+</button>
+                        </div>
+                        <div class="cart-item-price">฿<%= (item.price * item.qty).toFixed(2) %></div>
+                        <button class="cart-item-remove" title="Remove item">✕</button>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="cart-empty">
+                    <div class="cart-empty-icon">🛒</div>
+                    <h3>Your cart is empty</h3>
+                    <p>Looks like you haven't added any fruits yet!</p>
+                    <a href="/categories" class="btn-catalog">Start Shopping</a>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Cart Summary -->
+        <% if(cartItems && cartItems.length > 0) { %>
+            <% const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0); %>
+            <div class="cart-summary">
+                <h3>🧾 Order Summary</h3>
+                
+                <% cartItems.forEach(item => { %>
+                    <div class="cart-summary-item">
+                        <span><%= item.name %> × <%= item.qty %></span>
+                        <span>฿<%= (item.price * item.qty).toFixed(2) %></span>
+                    </div>
+                <% }); %>
+
+                <div class="cart-summary-divider"></div>
+
+                <div class="cart-summary-row">
+                    <span>Subtotal</span>
+                    <span class="subtotal-amount">฿<%= subtotal.toFixed(2) %></span>
+                </div>
+                <div class="cart-summary-row">
+                    <span>Shipping</span>
+                    <span style="color: var(--primary-dark); font-weight: 600;">FREE 🎉</span>
+                </div>
+                <div class="cart-summary-row">
+                    <span>Discount</span>
+                    <span style="color: #FF6B6B;">-฿0.00</span>
+                </div>
+                <div class="cart-summary-row total">
+                    <span>Total</span>
+                    <span class="total-amount">฿<%= subtotal.toFixed(2) %></span>
+                </div>
+
+                <button class="btn-checkout">🍉 Proceed to Checkout</button>
+                <a href="/categories" class="btn-continue-shopping">← Continue Shopping</a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

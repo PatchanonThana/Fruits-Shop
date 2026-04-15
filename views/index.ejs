@@ -1,0 +1,199 @@
+<%- include('partials/header', { title: 'Home' }) %>
+<%- include('partials/navbar', { activePage: 'home' }) %>
+
+<!-- ==================== HERO BANNER ==================== -->
+<section class="hero">
+    <img src="/images/main_banner_bg.png" alt="Fresh Fruits Banner" class="hero-banner">
+    <div class="hero-overlay"></div>
+    
+    <div class="hero-float">🍊</div>
+    <div class="hero-float">🥭</div>
+    <div class="hero-float">🍓</div>
+    <div class="hero-float">🍍</div>
+    
+    <div class="hero-content">
+        <h1>Fruit Shop</h1>
+        <p>Fruit flesh, the real taste of nature.</p>
+        <a href="/categories" class="btn-catalog">
+            🛒 Browse Catalog
+        </a>
+    </div>
+</section>
+
+<!-- ==================== BESTSELLERS ==================== -->
+<section class="section" id="bestsellers">
+    <h2 class="section-title animate-in">Bestsellers</h2>
+
+    <div class="bestsellers-grid animate-in">
+        <% bestsellers.forEach((fruit, index) => { %>
+            <% if(fruit) { %>
+            <div class="product-card animate-child">
+                <div class="product-card-image" style="background: linear-gradient(135deg, <%= fruit.cardColor %>33, <%= fruit.cardColor %>15);">
+                    <% if(index === 0) { %>
+                        <span class="product-badge">🔥 HOT</span>
+                    <% } else if(index === 1) { %>
+                        <span class="product-badge" style="background: linear-gradient(135deg, #FFD93D, #F39C12);">⭐ POPULAR</span>
+                    <% } %>
+                    <div class="product-wishlist">🤍</div>
+                    <img src="/images/<%= fruit.image %>" alt="<%= fruit.name %>">
+                </div>
+                <div class="product-card-info">
+                    <h4><%= fruit.name %></h4>
+                    <p class="product-desc"><%= fruit.desc %></p>
+                    <div class="product-card-bottom">
+                        <span class="product-price">฿<%= fruit.price %></span>
+                        <button class="btn-add-cart" title="Add to cart">
+                            <img src="/images/cart.svg" alt="Add to cart">
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        <% }); %>
+    </div>
+
+    <div style="text-align: right;">
+        <a href="/categories" class="btn-show-more">
+            Show more →
+        </a>
+    </div>
+</section>
+
+<!-- ==================== MAKING A JUICE ==================== -->
+<section class="juice-section" id="juice">
+    <h2 class="section-title animate-in">Making a Juice!</h2>
+    
+    <div class="juice-grid animate-in">
+        <!-- Mix Berry Drink -->
+        <div class="juice-card juice-card-left">
+            <div class="juice-card-content">
+                <h3>Mixed Berry Blast 🫐</h3>
+                <p>
+                    Blend together fresh strawberries, blueberries, and raspberries for a 
+                    refreshing antioxidant-packed smoothie. Add a splash of honey and yogurt 
+                    for the perfect creamy texture. Nature's perfect energy booster!
+                </p>
+            </div>
+            <div class="juice-card-image">
+                <img src="/images/mixberry.png" alt="Mixed Berry Drink">
+            </div>
+        </div>
+
+        <!-- Avocado Smoothie -->
+        <div class="juice-card juice-card-right">
+            <div class="juice-card-content">
+                <h3>Avocado Smoothie 🥑</h3>
+                <p>
+                    Creamy, dreamy avocado blended with fresh milk and a touch of sweetness. 
+                    Rich in healthy fats and vitamins, this smoothie is both delicious and 
+                    nutritious. The ultimate guilt-free treat!
+                </p>
+            </div>
+            <div class="juice-card-image">
+                <img src="/images/avocado.png" alt="Avocado Smoothie">
+            </div>
+        </div>
+    </div>
+
+    <!-- Extra juice showcase row -->
+    <div class="juice-showcase animate-in">
+        <div class="juice-mini-card">
+            <img src="/images/rainbowsmoothie.png" alt="Rainbow Smoothie">
+            <span>Rainbow Smoothie</span>
+        </div>
+        <div class="juice-mini-card">
+            <img src="/images/strawberryjuice.png" alt="Strawberry Juice">
+            <span>Strawberry Juice</span>
+        </div>
+        <div class="juice-mini-card">
+            <img src="/images/coconutwater.png" alt="Coconut Water">
+            <span>Coconut Water</span>
+        </div>
+        <div class="juice-mini-card">
+            <img src="/images/grapejuice.png" alt="Grape Juice">
+            <span>Grape Juice</span>
+        </div>
+        <div class="juice-mini-card">
+            <img src="/images/pineapplejuice.png" alt="Pineapple Juice">
+            <span>Pineapple Juice</span>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== CATEGORIES ==================== -->
+<section class="categories-section" id="categories">
+    <h2 class="section-title animate-in">Categories</h2>
+
+    <div class="categories-list animate-in">
+        <% categories.forEach((cat, index) => { %>
+            <a href="/categories?cat=<%= cat.slug %>" class="category-bar cat-<%= cat.slug.split('_') %> animate-child">
+                <div class="category-bar-left">
+                    <h3><%= cat.emoji %> <%= cat.name %></h3>
+                    <p><%= cat.desc %></p>
+                </div>
+                <div class="category-bar-right">
+                   <img src="/images/<%= cat.image %>" alt="<%= cat.name %>">
+                </div>
+            </a>
+        <% }); %>
+    </div>
+</section>
+
+<!-- ==================== POPULAR TREATS PREVIEW ==================== -->
+<section class="section" id="treats">
+    <h2 class="section-title animate-in">Popular Treats 🍨</h2>
+    
+    <div class="treats-scroll animate-in">
+        <div class="treat-card">
+            <div class="treat-image" style="background: linear-gradient(135deg, #FFECD2, #FCB69F);">
+                <img src="/images/tanghulu.png" alt="Tanghulu">
+            </div>
+            <h4>Tanghulu</h4>
+            <span class="product-price">฿40</span>
+        </div>
+        <div class="treat-card">
+            <div class="treat-image" style="background: linear-gradient(135deg, #A1C4FD, #C2E9FB);">
+                <img src="/images/shaveice.png" alt="Shave Ice">
+            </div>
+            <h4>Shave Ice</h4>
+            <span class="product-price">฿35</span>
+        </div>
+        <div class="treat-card">
+            <div class="treat-image" style="background: linear-gradient(135deg, #FFDEE9, #B5FFFC);">
+                <img src="/images/icecream.png" alt="Ice Cream">
+            </div>
+            <h4>Ice Cream</h4>
+            <span class="product-price">฿50</span>
+        </div>
+        <div class="treat-card">
+            <div class="treat-image" style="background: linear-gradient(135deg, #FFF1EB, #ACE0F9);">
+                <img src="/images/crepe.png" alt="Crepe">
+            </div>
+            <h4>Crepe</h4>
+            <span class="product-price">฿55</span>
+        </div>
+        <div class="treat-card">
+            <div class="treat-image" style="background: linear-gradient(135deg, #E8D5B7, #F5E6CC);">
+                <img src="/images/pudding.png" alt="Pudding">
+            </div>
+            <h4>Pudding</h4>
+            <span class="product-price">฿40</span>
+        </div>
+        <div class="treat-card">
+            <div class="treat-image" style="background: linear-gradient(135deg, #FBC2EB, #A6C1EE);">
+                <img src="/images/yogurt.png" alt="Yogurt">
+            </div>
+            <h4>Yogurt</h4>
+            <span class="product-price">฿45</span>
+        </div>
+        <div class="treat-card">
+            <div class="treat-image" style="background: linear-gradient(135deg, #D4FC79, #96E6A1);">
+                <img src="/images/jelly.png" alt="Jelly">
+            </div>
+            <h4>Jelly</h4>
+            <span class="product-price">฿30</span>
+        </div>
+    </div>
+</section>
+
+<%- include('partials/footer') %>

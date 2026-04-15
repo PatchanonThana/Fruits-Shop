@@ -1,5 +1,28 @@
 const model = require('../model/shopModel');
 
+exports.showLoginPage = (req,res) => {
+    res.json({messasge:"This Is Login Page!"})
+}
+
+exports.login = async (req,res) => {
+    const {username,password} = req.body;
+    const user = await model.findByUsernameAndPassword(username,password);
+
+    if (!user) {
+        return res.status(401).json({error:"Invalid username or password"})
+    }
+
+    req.session.user = {
+        user_id:user.user_id,
+        username:user.username
+    }
+
+    res.json({
+        message:"Login Success",
+        session:req.session.user
+    })
+}
+
 exports.showShopPage = async (req, res) => {
     const fruits = await model.findAllfruits();
     return res.json(fruits.map(fruit => {
@@ -9,31 +32,6 @@ exports.showShopPage = async (req, res) => {
             stock:fruit.stock
         }
     }))
-}
-
-exports.addCart = async (req,res) => {
-    try {
-        const user = req.session.user;
-        if (!user) {
-            res.redirect('/login-page')
-        }
-
-        const {user_id,fruit_id,quantity} = req.body;
-        const checker = await model.Cart.checkCart(user_id,fruit_id);
-
-        if (checker.length > 0) {
-            await model.Cart.updateCart(user_id,fruit_id,quantity);
-            res.status(200).json({message:"Update Cart Success"})
-        }
-        else {
-            await model.Cart.addCart(user_id,fruit_id,quantity);
-            res.status(201).json({message:"Add new item Success"})
-        }
-    }
-    catch (err) {
-        return res.status(500).json({error:"Something Went wrong please try again"});
-        console.error(err);
-    }
 }
 
 exports.showCartPage = async (req,res) => {
@@ -61,25 +59,27 @@ exports.showCartPage = async (req,res) => {
     res.json(cart)
 }
 
-exports.login = async (req,res) => {
-    const {username,password} = req.body;
-    const user = await model.findByUsernameAndPassword(username,password);
+exports.addCart = async (req,res) => {
+    try {
+        const user = req.session.user;
+        if (!user) {
+            res.redirect('/login-page')
+        }
 
-    if (!user) {
-        return res.status(401).json({error:"Invalid username or password"})
+        const {user_id,fruit_id,quantity} = req.body;
+        const checker = await model.Cart.checkCart(user_id,fruit_id);
+
+        if (checker.length > 0) {
+            await model.Cart.updateCart(user_id,fruit_id,quantity);
+            res.status(200).json({message:"Update Cart Success"})
+        }
+        else {
+            await model.Cart.addCart(user_id,fruit_id,quantity);
+            res.status(201).json({message:"Add new item Success"})
+        }
     }
-
-    req.session.user = {
-        user_id:user.user_id,
-        username:user.username
+    catch (err) {
+        return res.status(500).json({error:"Something Went wrong please try again"});
+        console.error(err);
     }
-
-    res.json({
-        message:"Login Success",
-        session:req.session.user
-    })
-}
-
-exports.showLoginPage = (req,res) => {
-    res.json({messasge:"This Is Login Page!"})
 }

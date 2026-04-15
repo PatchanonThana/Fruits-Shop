@@ -1,4 +1,4 @@
-const { fruitsDb } = require('../config/pg');
+const { fruitsDb } = require('../config/db');
 
 const Fruit = {
 
@@ -21,7 +21,6 @@ const Fruit = {
         return fruit.rows[0];
     }
 }
-
 
 async function findByUsernameAndPassword(username, password) {
     const user = await fruitsDb.query(

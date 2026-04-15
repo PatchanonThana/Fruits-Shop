@@ -3,7 +3,7 @@ const app = express();
 const session = require('express-session');
 
 const path = require('path');
-const {connectDb}  = require('./config/pg');
+const {connectDb}  = require('./config/db');
 const routes = require('./routes/shopeRoutes');
 
 const PORT = 3000;

@@ -24,14 +24,23 @@ exports.login = async (req,res) => {
 }
 
 exports.showShopPage = async (req, res) => {
-    const fruits = await model.findAllfruits();
+    const fruits = await model.Fruit.findAllfruits();
     return res.json(fruits.map(fruit => {
         return {
-            specie:fruit.specie,
+            specie:fruit.name,
             price:fruit.price,
             stock:fruit.stock
         }
     }))
+}
+
+exports.showFruit = async (req,res) => {
+    const fruit_id = Number(req.params.id); 
+    const fruit_info = await model.Fruit.findFruitById(fruit_id);
+    if (!fruit_info || Object.keys(fruit_info).length <= 0) {
+        return res.status(400).json({message:`No Such a fruit id: ${fruit_id}`});
+    }
+    return res.json(fruit_info);
 }
 
 exports.showCartPage = async (req,res) => {
@@ -43,8 +52,6 @@ exports.showCartPage = async (req,res) => {
     const fruitDetail = await Promise.all(
         userCart.map( async cart => {
             const fruit = await model.Fruit.findFruitById(cart.fruit_id);
-            console.log(fruit);
-            console.log(cart.fruit_id);
             return {
                 fruit_name:fruit.name,
                 fruit_price:fruit.price,

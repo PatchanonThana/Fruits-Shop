@@ -1,7 +1,12 @@
 // 1. เรียก library ที่ต้องใช้
 const express = require('express');
 const path = require('path');
+<<<<<<< HEAD
 const app = express();
+=======
+const {connectDb}  = require('./config/db');
+const routes = require('./routes/shopeRoutes');
+>>>>>>> fe1ec41bc9af974abaee1441d9b28714d1bbcf00
 
 // 2. ตั้งค่า
 app.set('view engine', 'ejs'); //EJS เป็นตัวสร้างหน้าเว็บ

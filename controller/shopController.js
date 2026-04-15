@@ -1,14 +1,7 @@
 const model = require('../model/shopModel');
 
-exports.showShopPage = async (req, res) => {
-    const fruits = await model.findAllfruits();
-    return res.json(fruits.map(fruit => {
-        return {
-            specie:fruit.specie,
-            price:fruit.price,
-            stock:fruit.stock
-        }
-    }))
+exports.showLoginPage = (req,res) => {
+    return res.json({messasge:"This Is Login Page!"})
 }
 
 exports.login = async (req,res) => {
@@ -30,11 +23,14 @@ exports.login = async (req,res) => {
     })
 }
 
+<<<<<<< HEAD
 //อันนี้เพิ่มมา
 exports.showLoginPage = (req,res) => {
     res.json({messasge:"This Is Login Page!"})
 }
 
+=======
+>>>>>>> fe1ec41bc9af974abaee1441d9b28714d1bbcf00
 exports.showShopPage = async (req, res) => {
     const user = req.session.user;
     if (!user) {

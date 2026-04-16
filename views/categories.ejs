@@ -55,7 +55,7 @@
                     const bannerClass = 'category-banner-card ' + bannerActiveClass;
                 %>
                 <a href="/categories?cat=<%= cat.slug %>" class="<%- bannerClass %>" style="<%- bannerStyle %>">
-                    <img src="/images/<%= cat.image %>" alt="<%= cat.name %>">
+                    <img src="/images/<%= cat.image_path %>" alt="<%= cat.name %>">
                     <h3><%= cat.emoji %> <%= cat.name %></h3>
                 </a>
             <% }); %>
@@ -105,7 +105,7 @@
                     <div class="product-card-image" style="<%- cardStyle %>">
                         <%- badgeHTML %>
                         <div class="product-wishlist">🤍</div>
-                        <img src="/images/<%= fruit.image %>" alt="<%= fruit.name %>">
+                        <img src="/images/<%= fruit.image_path %>" alt="<%= fruit.name %>">
                     </div>
                     <div class="product-card-info">
                         <div class="product-category-tag"><%- tagText %></div>
@@ -113,7 +113,7 @@
                         <p class="product-desc"><%= fruit.desc %></p>
                         <div class="product-card-bottom">
                             <span class="product-price">฿<%= fruit.price %></span>
-                            <button class="btn-add-cart" title="Add to cart" data-fruit-id="<%= fruit.id %>">
+                            <button class="btn-add-cart" title="Add to cart" data-fruit-id="<%= fruit.fruit_id %>">
                                 <img src="/images/cart.svg" alt="Add to cart">
                             </button>
                         </div>

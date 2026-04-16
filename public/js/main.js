@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.stopPropagation();
             const isActive = btn.classList.toggle('active');
             btn.innerHTML = isActive ? '❤️' : '🤍';
-            
+
             // Add bounce animation
             btn.style.transform = 'scale(1.3)';
             setTimeout(() => {
@@ -74,9 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === Add to cart animation ===
     document.querySelectorAll('.btn-add-cart').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             e.stopPropagation();
-            
+
             // Create floating animation
             const rect = btn.getBoundingClientRect();
             const floater = document.createElement('div');
@@ -105,17 +105,50 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             setTimeout(() => floater.remove(), 900);
+            const fruitId = btn.dataset.fruitId;
+
+            try {
+                const response = await fetch('/add-cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: 2,
+                        fruit_id: fruitId,
+                        quantity: 1
+                    })
+                });
+
+                if (response.ok) {
+                    const badge = document.querySelector('.cart-badge');
+                    if (badge) {
+
+                        let currentCount = parseInt(badge.textContent.trim() || 0);
+                        badge.textContent = currentCount + 1;
+
+                        badge.style.transition = 'transform 0.2s ease';
+                        badge.style.transform = 'scale(1.4)';
+
+                        setTimeout(() => {
+                            badge.style.transform = 'scale(1)';
+                        }, 200);
+                    }
+                    console.log('Added to database successfully!');
+                }
+            } catch (err) {
+                console.error("Failed to add to cart:", err);
+                alert("เกิดข้อผิดพลาดในการเพิ่มสินค้าลงตะกร้า");
+            }
 
             // Update badge
-            const badge = document.querySelector('.cart-badge');
-            if (badge) {
-                const count = parseInt(badge.textContent) + 1;
-                badge.textContent = count;
-                badge.style.transform = 'scale(1.3)';
-                setTimeout(() => {
-                    badge.style.transform = 'scale(1)';
-                }, 200);
-            }
+            // const badge = document.querySelector('.cart-badge');
+            // if (badge) {
+            //     const count = parseInt(badge.textContent) + 1;
+            //     badge.textContent = count;
+            //     badge.style.transform = 'scale(1.3)';
+            //     setTimeout(() => {
+            //         badge.style.transform = 'scale(1)';
+            //     }, 200);
+            // }
 
             // Button feedback
             btn.style.transform = 'scale(0.85)';
@@ -127,18 +160,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === Cart quantity controls ===
     document.querySelectorAll('.cart-qty button').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
+            const itemContainer = btn.closest('.cart-item');
+            const fruitId = itemContainer.dataset.fruitId;
             const qtySpan = btn.parentElement.querySelector('span');
-            let qty = parseInt(qtySpan.textContent);
-            
-            if (btn.classList.contains('qty-minus')) {
-                qty = Math.max(1, qty - 1);
-            } else {
-                qty++;
+            let currentQty = parseInt(qtySpan.textContent);
+
+            let change = btn.classList.contains('qty-plus') ? 1 : -1;
+            if (currentQty === 1 && change === -1) return;
+
+            // if (btn.classList.contains('qty-minus')) {
+            //     qty = Math.max(1, qty - 1);
+            // } else {
+            //     qty++;
+            // }
+
+            // qtySpan.textContent = qty;
+            // updateCartTotal();
+
+            try {
+                const response = await fetch('/add-cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: 2,
+                        fruit_id: fruitId,
+                        quantity: change
+                    })
+                });
+                const data = await response.json(); // รับค่า JSON จาก server
+
+                if (response.ok) {
+                    const badge = document.querySelector('.cart-badge');
+                    if (badge && data.cartCount !== undefined) {
+                        badge.textContent = data.cartCount; 
+                    }
+                    qtySpan.textContent = currentQty + change;
+                    updateCartTotal();
+
+                    const pricePerUnit = parseFloat(itemContainer.dataset.price);
+                    const itemPriceTotal = itemContainer.querySelector('.cart-item-price');
+                    itemPriceTotal.textContent = `฿${(pricePerUnit * (currentQty + change)).toFixed(2)}`;
+                }
+            } catch (err) {
+                console.error("Update failed:", err);
             }
-            
-            qtySpan.textContent = qty;
-            updateCartTotal();
+
         });
     });
 
@@ -146,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCartTotal() {
         const items = document.querySelectorAll('.cart-item');
         let subtotal = 0;
-        
+
         items.forEach(item => {
             const price = parseFloat(item.dataset.price || 0);
             const qty = parseInt(item.querySelector('.cart-qty span')?.textContent || 1);
@@ -155,17 +222,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const subtotalEl = document.querySelector('.subtotal-amount');
         const totalEl = document.querySelector('.total-amount');
-        
+
         if (subtotalEl) subtotalEl.textContent = `฿${subtotal.toFixed(2)}`;
         if (totalEl) totalEl.textContent = `฿${subtotal.toFixed(2)}`;
     }
 
     // === Remove cart item ===
     document.querySelectorAll('.cart-item-remove').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             const item = btn.closest('.cart-item');
-            item.style.transform = 'translateX(100%)';
-            item.style.opacity = '0';
+            const fruitId = item.dataset.fruitId;
+            // item.style.transform = 'translateX(100%)';
+            // item.style.opacity = '0';
+
+            try {
+                const response = await fetch('/remove-cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: 2,
+                        fruit_id: fruitId,
+                    })
+                });
+
+                if (response.ok) {
+                    item.style.transform = 'translateX(100%)';
+                    item.style.opacity = '0';
+                    cartHead = document.querySelectorAll('.cart-items-amount');
+                    setTimeout(async () => {
+                        item.remove();
+                        const data = await response.json();
+                        const cartHead = document.querySelector('.cart-items-amount');
+                        if (cartHead && data.cartAmount !== undefined) {
+                            cartHead.textContent = `🛒 Shopping Cart (${data.cartAmount} items)`;
+                        }
+                        const badge = document.querySelector('.cart-badge');
+                        if (badge && data.cartCount !== undefined) {
+                            badge.textContent = data.cartCount; 
+                        }
+                        updateCartTotal();
+                        checkEmptyCart();
+                    }, 300);
+                }
+            } catch (err) {
+                console.error("Remove failed:", err);
+            }
+
             setTimeout(() => {
                 item.remove();
                 updateCartTotal();
@@ -225,6 +327,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 banner.style.transform = `translateY(${scrolled * 0.3}px)`;
             }
         });
+    }
+
+    function checkEmptyCart() {
+        // ถ้าไม่มี item เหลืออยู่ในหน้าจอเลย
+        if (document.querySelectorAll('.cart-item').length === 0) {
+            updateCartTotal();
+            const section = document.querySelector('.cart-items-section');
+            if (section) {
+                section.innerHTML =
+                    `
+                        <div class="cart-empty">
+                            <div class="cart-empty-icon">🛒</div>
+                            <h3>Your cart is empty</h3>
+                            <p>Looks like you haven't added any fruits yet!</p>
+                            <a href="/" class="btn-catalog">Start Shopping</a>
+                        </div>
+                    `;
+            }
+            // const badge = document.querySelector('.cart-badge');
+            // if (badge) badge.textContent = '0';
+        }
     }
 
     console.log('🍉 Fruit Shop loaded! Fresh fruits await you!');

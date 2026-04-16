@@ -25,7 +25,7 @@
     <h2 class="section-title animate-in">Bestsellers</h2>
 
     <div class="bestsellers-grid animate-in">
-        <% bestsellers.forEach((fruit, index) => { %>
+        <% bestSellers.forEach((fruit, index) => { %>
             <% if(fruit) { %>
             <div class="product-card animate-child">
                 <div class="product-card-image" style="background: linear-gradient(135deg, <%= fruit.cardColor %>33, <%= fruit.cardColor %>15);">
@@ -35,14 +35,14 @@
                         <span class="product-badge" style="background: linear-gradient(135deg, #FFD93D, #F39C12);">⭐ POPULAR</span>
                     <% } %>
                     <div class="product-wishlist">🤍</div>
-                    <img src="/images/<%= fruit.image %>" alt="<%= fruit.name %>">
+                    <img src="/images/<%= fruit.image_path %>" alt="<%= fruit.name %>">
                 </div>
                 <div class="product-card-info">
                     <h4><%= fruit.name %></h4>
                     <p class="product-desc"><%= fruit.desc %></p>
                     <div class="product-card-bottom">
                         <span class="product-price">฿<%= fruit.price %></span>
-                        <button class="btn-add-cart" title="Add to cart">
+                        <button class="btn-add-cart" title="Add to cart" data-fruit-id = <%= fruit.fruit_id %>>
                             <img src="/images/cart.svg" alt="Add to cart">
                         </button>
                     </div>
@@ -132,7 +132,7 @@
                     <p><%= cat.desc %></p>
                 </div>
                 <div class="category-bar-right">
-                   <img src="/images/<%= cat.image %>" alt="<%= cat.name %>">
+                   <img src="/images/<%= cat.image_path %>" alt="<%= cat.name %>">
                 </div>
             </a>
         <% }); %>

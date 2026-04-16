@@ -2,6 +2,15 @@ const { fruitsDb } = require('../config/db');
 
 const Fruit = {
 
+    findAllCategories: async () => {
+        const categories = await fruitsDb.query(
+            `
+            SELECT * FROM categories
+            `
+        )
+        return categories.rows;
+    },
+
     findAllfruits: async () => {
         const fruits = await fruitsDb.query(
             `
@@ -38,14 +47,14 @@ const Cart = {
 
         findUserCart: async (user_id) => {
 
-            const resutl = await fruitsDb.query(
+            const result = await fruitsDb.query(
                 `
                 SELECT * FROM cart
                 WHERE user_id = $1;
                 `, [user_id]
             )
 
-            return resutl.rows || []
+            return result.rows || []
 
         },
 
@@ -59,7 +68,7 @@ const Cart = {
                 `, [user_id, fruit_id]
             );
 
-            return result.rows[0] || [];
+            return result.rows || [];
             
         },
 
@@ -81,6 +90,16 @@ const Cart = {
                 SET quantity = quantity + $3
                 WHERE user_id = $1 AND fruit_id = $2;
                 `, [user_id, fruit_id, quantity]
+            );
+        },
+
+        removeCart: async (user_id,fruit_id) => {
+            await fruitsDb.query(
+                `
+                DELETE FROM cart
+                WHERE user_id = $1 AND
+                fruit_id = $2
+                `, [user_id,fruit_id]
             );
         }
 }

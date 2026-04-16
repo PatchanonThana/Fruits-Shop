@@ -3,8 +3,6 @@
   "version": "1.0.0",
   "description": "Fruit shop web app",
   "main": "app.js",
-<<<<<<< HEAD
-=======
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "app":"node app.js",
@@ -13,12 +11,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
->>>>>>> fe1ec41bc9af974abaee1441d9b28714d1bbcf00
   "type": "commonjs",
-  "scripts": {
-    "start": "node app.js",
-    "dev": "npx nodemon app.js"
-  },
   "dependencies": {
     "dotenv": "^17.0.0",
     "ejs": "^3.1.9",

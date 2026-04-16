@@ -23,14 +23,6 @@ exports.login = async (req,res) => {
     })
 }
 
-<<<<<<< HEAD
-//อันนี้เพิ่มมา
-exports.showLoginPage = (req,res) => {
-    res.json({messasge:"This Is Login Page!"})
-}
-
-=======
->>>>>>> fe1ec41bc9af974abaee1441d9b28714d1bbcf00
 exports.showShopPage = async (req, res) => {
     const user = req.session.user;
     if (!user) {

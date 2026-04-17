@@ -26,34 +26,35 @@ async function startServer() {
     }));
 
     app.use(express.urlencoded({ extended: true }));
-
+    
     app.use(async (req, res, next) => {
         try {
             let totalItems = 0;
-            const testUserId = 2; 
+            let user = req.session.user;
 
-            if (testUserId) {
-                const userCart = await model.Cart.findUserCart(testUserId);
-                
+            if (user) {
+                const userId = req.session.user.user_id;
+                const userCart = await model.Cart.findUserCart(userId);
+
                 if (userCart && Array.isArray(userCart)) {
                     totalItems = userCart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
                 }
             }
-            
+
             res.locals.cartCount = totalItems;
             next();
+
         } catch (err) {
             console.error("Cart Middleware Error:", err);
             res.locals.cartCount = 0;
             next();
         }
     });
-
     
-    app.use(express.static(path.join(__dirname, 'public')));
-
     app.set('view engine', 'ejs');
     app.set('views', path.join(__dirname, 'views'));
+    
+    app.use(express.static(path.join(__dirname, 'public')));
 
     // app.use(async (req,res,next) => {
     //     console.log('access');
@@ -66,7 +67,7 @@ async function startServer() {
     //             console.log(totalItems);
     //             res.locals.cartCount = totalItems;
     //         }
-            
+
     //         next();
     //     }
     //     catch (err) {
@@ -74,8 +75,6 @@ async function startServer() {
     //         next()
     //     }
     // });
-
-    
 
     app.use('/', routes);
 

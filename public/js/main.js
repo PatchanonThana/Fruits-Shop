@@ -112,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        user_id: 2,
                         fruit_id: fruitId,
                         quantity: 1
                     })
@@ -183,7 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        user_id: 2,
                         fruit_id: fruitId,
                         quantity: change
                     })
@@ -240,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        user_id: 2,
                         fruit_id: fruitId,
                     })
                 });

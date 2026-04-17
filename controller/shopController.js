@@ -5,21 +5,25 @@ exports.showLoginPage = (req, res) => {
 }
 
 exports.login = async (req, res) => {
-    const { username, password } = req.body;
-    const user = await model.findByUsernameAndPassword(username, password);
+
+    const { email, password } = req.body;
+    const user = await model.User.findByEmailAndPassword(email, password);
 
     if (!user) {
-        return res.status(401).json({ error: "Invalid username or password" })
+        return res.status(401).redirect('/login-page?error=1');
     }
 
-    req.session.user = {
-        user_id: user.user_id,
-        username: user.username
-    }
+    req.session.regenerate((err) => {
+        if (err) {
+            res.status(500).json({error:"Can not create ession"});
+        }
+        req.session.user = {
+            user_id:user.user_id,
+            email:user.email,
+            role:user.role
+        }
 
-    return res.json({
-        message: "Login Success",
-        session: req.session.user
+        return res.redirect('/shop-page')
     })
 }
 
@@ -41,10 +45,10 @@ exports.getBestSeller = (allFruits) => {
 }
 
 exports.showShopPage = async (req, res) => {
-    // const user = req.session.user;
-    // if (!user) {
-    //     return res.redirect('/login-page');
-    // }
+    const user = req.session.user;
+    if (!user) {
+         return res.redirect('/login-page?notLoginYet=1');
+    }
     const categories = await model.Fruit.findAllCategories();
     const allFruits = await model.Fruit.findAllfruits();
     const bestSellers = this.getBestSeller(allFruits);
@@ -66,6 +70,12 @@ exports.showShopPage = async (req, res) => {
 // }
 
 exports.showCategoriesPage = async (req,res) => {
+
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect('/login-page?notLoginYet=1')
+    }
+
     const activeCategory = req.query.cat || 'all';
     const allFruits = await model.Fruit.findAllfruits();
     const categories = await model.Fruit.findAllCategories();
@@ -77,11 +87,11 @@ exports.showCategoriesPage = async (req,res) => {
 }
 
 exports.showCartPage = async (req, res) => {
-    // const user = req.session.user;
-    // if (!user) {
-    //     return res.redirect('/login-page')
-    // }
-    const userCart = await model.Cart.findUserCart(2); /*user.user_id*/
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect('/login-page?notLoginYet=1')
+    }
+    const userCart = await model.Cart.findUserCart(user.user_id); 
     const cartItems = await Promise.all(
         userCart.map(async cart => {
             const fruit = await model.Fruit.findFruitById(cart.fruit_id);
@@ -102,12 +112,13 @@ exports.showCartPage = async (req, res) => {
 
 exports.updateOrAddCart = async (req, res) => {
     try {
-        // const user = req.session.user;
-        // if (!user) {
-        //     return res.redirect('/login-page')
-        // }
+        const user = req.session.user;
+        if (!user) {
+            return res.redirect('/login-page?notLoginYet=1')
+        }
 
-        const { user_id, fruit_id, quantity } = req.body;
+        const {fruit_id, quantity } = req.body;
+        const user_id = user.user_id;
         const checker = await model.Cart.checkCart(user_id, fruit_id);
         
         if (checker.length > 0) {
@@ -130,7 +141,14 @@ exports.updateOrAddCart = async (req, res) => {
 }
 
 exports.removeCart = async (req,res) => {
-    const {user_id,fruit_id} = req.body;
+
+    const user = req.session.user;
+    if (!user) {
+        res.redirect('/login?notLoginYet=1');
+    }
+
+    const {fruit_id} = req.body;
+    const user_id = user.user_id;
     await model.Cart.removeCart(user_id,fruit_id);
     const userCart = await model.Cart.findUserCart(user_id);
     const itemAmount = userCart.length;

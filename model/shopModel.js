@@ -31,81 +31,82 @@ const Fruit = {
     }
 }
 
-async function findByUsernameAndPassword(username, password) {
-    const user = await fruitsDb.query(
-        `
-        SELECT user_id,username FROM users
-        WHERE username = $1
-        AND password_db = crypt($2,password_db);
-        `, [username, password]
-    );
-    return user.rows[0];
+const User = {
+    findByEmailAndPassword: async (email, password) => {
+        const user = await fruitsDb.query(
+            `
+        SELECT user_id,email,role FROM users
+        WHERE email = $1
+        AND password = crypt($2,password);
+        `, [email, password]
+        );
+        return user.rows[0];
+    }
 }
-
 
 const Cart = {
 
-        findUserCart: async (user_id) => {
+    findUserCart: async (user_id) => {
 
-            const result = await fruitsDb.query(
-                `
+        const result = await fruitsDb.query(
+            `
                 SELECT * FROM cart
                 WHERE user_id = $1;
                 `, [user_id]
-            )
+        )
 
-            return result.rows || []
+        return result.rows || []
 
-        },
+    },
 
-        checkCart: async (user_id, fruit_id) => {
-           
-            const result = await fruitsDb.query(
-                `
+    checkCart: async (user_id, fruit_id) => {
+
+        const result = await fruitsDb.query(
+            `
                 SELECT * FROM cart
                 WHERE user_id = $1 AND
                 fruit_id = $2;
                 `, [user_id, fruit_id]
-            );
+        );
 
-            return result.rows || [];
-            
-        },
+        return result.rows || [];
 
-        addCart: async (user_id, fruit_id, quantity) => {
-            await fruitsDb.query(
-                `
+    },
+
+    addCart: async (user_id, fruit_id, quantity) => {
+        await fruitsDb.query(
+            `
                 INSERT INTO cart (user_id,fruit_id,quantity)
                 VALUES
                 ($1,$2,$3);
                 `, [user_id, fruit_id, quantity]
-            );
-        },
+        );
+    },
 
 
-        updateCart: async (user_id, fruit_id, quantity) => {
-            await fruitsDb.query(
-                `
+    updateCart: async (user_id, fruit_id, quantity) => {
+        await fruitsDb.query(
+            `
                 UPDATE cart
                 SET quantity = quantity + $3
                 WHERE user_id = $1 AND fruit_id = $2;
                 `, [user_id, fruit_id, quantity]
-            );
-        },
+        );
+    },
 
-        removeCart: async (user_id,fruit_id) => {
-            await fruitsDb.query(
-                `
+    removeCart: async (user_id, fruit_id) => {
+        await fruitsDb.query(
+            `
                 DELETE FROM cart
                 WHERE user_id = $1 AND
                 fruit_id = $2
-                `, [user_id,fruit_id]
-            );
-        }
+                `, [user_id, fruit_id]
+        );
+    }
 }
 
 
 
 module.exports = {
-    Fruit, findByUsernameAndPassword, Cart
+    Fruit, User, Cart
 };

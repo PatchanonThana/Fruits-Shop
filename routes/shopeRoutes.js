@@ -7,7 +7,8 @@ route.get('/', (req,res) => res.redirect('/shop-page'))
 
 route.get('/login-page', controller.showLoginPage);
 route.post('/login', controller.login);
-route.get('/register', controller.showRegisterPage);
+route.get('/register-page', controller.showRegisterPage);
+route.post('/register', controller.register);
 
 route.get('/shop-page', controller.showShopPage);
 //route.get('/fruit/:id', controller.showFruit);

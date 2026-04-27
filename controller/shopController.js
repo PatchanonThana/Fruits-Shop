@@ -1,3 +1,4 @@
+const { fruitsDb } = require('../config/db');
 const model = require('../model/shopModel');
 
 exports.showLoginPage = (req, res) => {
@@ -10,17 +11,17 @@ exports.login = async (req, res) => {
     const user = await model.User.findByEmailAndPassword(email, password);
 
     if (!user) {
-        return res.status(401).redirect('/login-page?error=1');
+        return res.status(401).redirect('/login-page?NoUser=1');
     }
 
     req.session.regenerate((err) => {
         if (err) {
-            res.status(500).json({error:"Can not create ession"});
+            res.status(500).json({ error: "Can not create ession" });
         }
         req.session.user = {
-            user_id:user.user_id,
-            email:user.email,
-            role:user.role
+            user_id: user.user_id,
+            email: user.email,
+            role: user.role
         }
 
         return res.redirect('/shop-page')
@@ -29,6 +30,40 @@ exports.login = async (req, res) => {
 
 exports.showRegisterPage = (req, res) => {
     res.render('register');
+}
+
+exports.register = async (req, res) => {
+    try {
+        const { firstName, lastName, email, phone, password, confirmPassword } = req.body;
+        const check = await model.User.checkUser(email, phone);
+
+        if (check) {
+            const dupMail = check.find(c => c.email === email);
+            const dupPhone = check.find(c => c.phone === phone);
+
+            if (dupMail) {
+                return res.status(401).redirect('/register-page?dupMail=1');
+            }
+            if (dupPhone) {
+                return res.status(401).redirect('/register-page?dupPhone=1');
+            }
+        }
+
+        if (password !== confirmPassword) {
+            return res.redirect('/register-page?difPass=1');
+        }
+
+        const checkCreat = await model.User.insertNewUser(email, password, "USER", firstName, lastName, phone);
+        if (!checkCreat) {
+            console.log('Can not creat new user');
+            return res.status(500).redirect('/register-page?error=1');
+        }
+        return res.status(201).redirect('/login-page?success=1');
+    }
+    catch (err) {
+        console.error('Register error: ', err);
+        return res.status(500).send('Internal Server Error');
+    }
 }
 
 exports.getBestSeller = (allFruits) => {
@@ -47,7 +82,7 @@ exports.getBestSeller = (allFruits) => {
 exports.showShopPage = async (req, res) => {
     const user = req.session.user;
     if (!user) {
-         return res.redirect('/login-page?notLoginYet=1');
+        return res.redirect('/login-page?notLoginYet=1');
     }
     const categories = await model.Fruit.findAllCategories();
     const allFruits = await model.Fruit.findAllfruits();
@@ -69,7 +104,7 @@ exports.showShopPage = async (req, res) => {
 //     return res.json(fruit_info);
 // }
 
-exports.showCategoriesPage = async (req,res) => {
+exports.showCategoriesPage = async (req, res) => {
 
     const user = req.session.user;
     if (!user) {
@@ -83,7 +118,7 @@ exports.showCategoriesPage = async (req,res) => {
     if (activeCategory !== 'all') {
         filteredFruits = allFruits.filter(f => f.category === activeCategory);
     }
-    return res.render('categories', {categories, allFruits: filteredFruits, activeCategory})
+    return res.render('categories', { categories, allFruits: filteredFruits, activeCategory })
 }
 
 exports.showCartPage = async (req, res) => {
@@ -91,12 +126,12 @@ exports.showCartPage = async (req, res) => {
     if (!user) {
         return res.redirect('/login-page?notLoginYet=1')
     }
-    const userCart = await model.Cart.findUserCart(user.user_id); 
+    const userCart = await model.Cart.findUserCart(user.user_id);
     const cartItems = await Promise.all(
         userCart.map(async cart => {
             const fruit = await model.Fruit.findFruitById(cart.fruit_id);
             return {
-                fruit_id:fruit.fruit_id,
+                fruit_id: fruit.fruit_id,
                 name: fruit.name,
                 price: fruit.price,
                 image_path: fruit.image_path,
@@ -107,7 +142,7 @@ exports.showCartPage = async (req, res) => {
         })
     )
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.qty), 0);
-    return res.render('cart', {cartItems,subtotal});
+    return res.render('cart', { cartItems, subtotal });
 }
 
 exports.updateOrAddCart = async (req, res) => {
@@ -117,21 +152,21 @@ exports.updateOrAddCart = async (req, res) => {
             return res.redirect('/login-page?notLoginYet=1')
         }
 
-        const {fruit_id, quantity } = req.body;
+        const { fruit_id, quantity } = req.body;
         const user_id = user.user_id;
         const checker = await model.Cart.checkCart(user_id, fruit_id);
-        
+
         if (checker.length > 0) {
             await model.Cart.updateCart(user_id, fruit_id, quantity);
-            const checker_2 = await model.Cart.findUserCart(user_id,fruit_id);
+            const checker_2 = await model.Cart.findUserCart(user_id, fruit_id);
             const totalItems = checker_2.reduce((sum, item) => sum + Number(item.quantity), 0);
-            return res.status(200).json({ message: "Update Cart Success" , cartCount:totalItems})
+            return res.status(200).json({ message: "Update Cart Success", cartCount: totalItems })
         }
         else {
             await model.Cart.addCart(user_id, fruit_id, quantity);
             const checker_2 = await model.Cart.findUserCart(user_id);
             const totalItems = checker_2.reduce((sum, item) => sum + Number(item.quantity), 0);
-            return res.status(201).json({ message: "Add new item Success" , cartCount:totalItems});
+            return res.status(201).json({ message: "Add new item Success", cartCount: totalItems });
         }
     }
     catch (err) {
@@ -140,18 +175,18 @@ exports.updateOrAddCart = async (req, res) => {
     }
 }
 
-exports.removeCart = async (req,res) => {
+exports.removeCart = async (req, res) => {
 
     const user = req.session.user;
     if (!user) {
         res.redirect('/login?notLoginYet=1');
     }
 
-    const {fruit_id} = req.body;
+    const { fruit_id } = req.body;
     const user_id = user.user_id;
-    await model.Cart.removeCart(user_id,fruit_id);
+    await model.Cart.removeCart(user_id, fruit_id);
     const userCart = await model.Cart.findUserCart(user_id);
     const itemAmount = userCart.length;
-    const itemCount = userCart.reduce((sum,item) => sum + Number(item.quantity),0);
-    return res.json({cartAmount:itemAmount, cartCount:itemCount});
+    const itemCount = userCart.reduce((sum, item) => sum + Number(item.quantity), 0);
+    return res.json({ cartAmount: itemAmount, cartCount: itemCount });
 }

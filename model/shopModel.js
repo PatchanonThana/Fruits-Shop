@@ -32,6 +32,18 @@ const Fruit = {
 }
 
 const User = {
+
+    checkUser: async (email,phone) => {
+        const user = await fruitsDb.query(
+             `
+             SELECT email,phone FROM users
+             WHERE email = $1 OR 
+             phone = $2
+             `, [email,phone]
+        );
+        return user.rows;
+    },
+
     findByEmailAndPassword: async (email, password) => {
         const user = await fruitsDb.query(
             `
@@ -41,7 +53,21 @@ const User = {
         `, [email, password]
         );
         return user.rows[0];
+    },
+
+    insertNewUser: async (email,password,role,first_name,last_name,phone) => {
+        const new_user_id = await fruitsDb.query(
+            `
+            INSERT INTO users (email,password,role,first_name,last_name,phone)
+            VALUES
+            ($1,crypt($2, gen_salt('bf')),$3,$4,$5,$6)
+            RETURNING user_id;
+            `, [email,password,role,first_name,last_name,phone]
+        );
+
+        return new_user_id;
     }
+
 }
 
 const Cart = {

@@ -42,15 +42,15 @@ exports.register = async (req, res) => {
             const dupPhone = check.find(c => c.phone === phone);
 
             if (dupMail) {
-                return res.status(401).redirect('/register-page?dupMail=1');
+                return res.status(400).redirect('/register-page?dupMail=1');
             }
             if (dupPhone) {
-                return res.status(401).redirect('/register-page?dupPhone=1');
+                return res.status(400).redirect('/register-page?dupPhone=1');
             }
         }
 
         if (password !== confirmPassword) {
-            return res.redirect('/register-page?difPass=1');
+            return res.status(400).redirect('/register-page?difPass=1');
         }
 
         const checkCreat = await model.User.insertNewUser(email, password, "USER", firstName, lastName, phone);

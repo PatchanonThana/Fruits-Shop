@@ -66,6 +66,17 @@ exports.register = async (req, res) => {
     }
 }
 
+exports.logout = (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Logout error:', err);
+            return res.redirect('/shop-page');
+        }
+        res.clearCookie('connect.sid');
+        return res.redirect('/login-page?loggedOut=1');
+    });
+};
+
 exports.getBestSeller = (allFruits) => {
     const bestSellers = [
         allFruits.find(f => f.name === 'Durian'),
@@ -190,3 +201,104 @@ exports.removeCart = async (req, res) => {
     const itemCount = userCart.reduce((sum, item) => sum + Number(item.quantity), 0);
     return res.json({ cartAmount: itemAmount, cartCount: itemCount });
 }
+
+// ==========================================
+// Show Checkout Page
+// ==========================================
+exports.showCheckoutPage = async (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect('/login-page?notLoginYet=1');
+    }
+
+    const userCart = await model.Cart.findUserCart(user.user_id);
+
+    if (!userCart || userCart.length === 0) {
+        return res.redirect('/cart-page');
+    }
+
+    const cartItems = await Promise.all(
+        userCart.map(async cart => {
+            const fruit = await model.Fruit.findFruitById(cart.fruit_id);
+            return {
+                fruit_id: fruit.fruit_id,
+                name: fruit.name,
+                price: fruit.price,
+                image_path: fruit.image_path,
+                desc: fruit.description,
+                qty: cart.quantity
+            };
+        })
+    );
+
+    const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.qty), 0);
+    const shipping = 0; // free shipping
+    const total = subtotal + shipping;
+
+    return res.render('checkout', {
+        cartItems,
+        subtotal,
+        shipping,
+        total,
+        activePage: 'checkout'
+    });
+};
+
+// ==========================================
+// Process Checkout (POST)
+// ==========================================
+exports.processCheckout = async (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect('/login-page?notLoginYet=1');
+    }
+
+    try {
+        const {
+            fullName,
+            address,
+            city,
+            postalCode,
+            phone,
+            paymentMethod
+        } = req.body;
+
+        // Get cart items for order
+        const userCart = await model.Cart.findUserCart(user.user_id);
+
+        if (!userCart || userCart.length === 0) {
+            return res.redirect('/cart-page');
+        }
+
+        // Calculate total
+        let total = 0;
+        for (const item of userCart) {
+            const fruit = await model.Fruit.findFruitById(item.fruit_id);
+            total += fruit.price * item.quantity;
+        }
+
+        // TODO: Save order to database
+        // await model.Order.createOrder(user.user_id, total, address, ...);
+
+        // Clear cart after checkout
+        await model.Cart.clearUserCart(user.user_id);
+
+        // Redirect to success page
+        return res.redirect('/checkout-success');
+
+    } catch (err) {
+        console.error('Checkout error:', err);
+        return res.redirect('/checkout-page?error=1');
+    }
+};
+
+// ==========================================
+// Checkout Success Page
+// ==========================================
+exports.showCheckoutSuccess = (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect('/login-page?notLoginYet=1');
+    }
+    return res.render('checkout-success', { activePage: 'checkout' });
+};

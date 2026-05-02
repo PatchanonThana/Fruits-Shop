@@ -3,86 +3,151 @@
 
 <div class="cart-page">
     <div class="cart-container">
-        <!-- Cart Items -->
-        <div class="cart-items-section">
-            <h2 class="cart-items-amount">🛒 Shopping Cart (<%= cartItems.length %> items)</h2>
 
-            <% if(cartItems && cartItems.length> 0) { %>
-                <% cartItems.forEach(item=> { %>
-                    <div class="cart-item" data-price="<%= item.price %>" data-fruit-id=" <%= item.fruit_id %>">
+        <!-- ==================== CART ITEMS ==================== -->
+        <div class="cart-items-section">
+            <h2>🛒 Shopping Cart (<%= cartItems.length %> items)</h2>
+
+            <% if (cartItems && cartItems.length > 0) { %>
+                <% cartItems.forEach(function(item) { %>
+                    <%
+                        const fruitId = item.fruit_id;
+                        const qtyMinus = item.qty - 1;
+                        const qtyPlus = item.qty + 1;
+                        const lineTotal = (item.price * item.qty).toFixed(2);
+                        const unitPrice = item.price;
+                    %>
+                    <div class="cart-item" data-price="<%- unitPrice %>" data-fruit-id="<%- fruitId %>">
                         <div class="cart-item-image">
                             <img src="/images/<%= item.image_path %>" alt="<%= item.name %>">
                         </div>
                         <div class="cart-item-details">
-                            <h4>
-                                <%= item.name %>
-                            </h4>
-                            <p>
-                                <%= item.desc %>
-                            </p>
-                            <span class="cart-item-unit-price">฿<%= item.price %> each</span>
+                            <h4><%= item.name %></h4>
+                            <p><%= item.desc %></p>
+                            <span class="cart-item-unit-price">฿<%- unitPrice %> each</span>
                         </div>
                         <div class="cart-qty">
-                            <button class="qty-minus">−</button>
-                            <span>
-                                <%= item.qty %>
-                            </span>
-                            <button class="qty-plus">+</button>
+                            <button class="qty-minus" data-id="<%- fruitId %>" data-qty="<%- qtyMinus %>">−</button>
+                            <span><%= item.qty %></span>
+                            <button class="qty-plus" data-id="<%- fruitId %>" data-qty="<%- qtyPlus %>">+</button>
                         </div>
-                        <div class="cart-item-price">฿<%= (item.price * item.qty).toFixed(2) %>
-                        </div>
-                        <button class="cart-item-remove" title="Remove item">✕</button>
+                        <div class="cart-item-price">฿<%- lineTotal %></div>
+                        <button class="cart-item-remove" data-id="<%- fruitId %>" title="Remove">✕</button>
                     </div>
-                    <% }); %>
-                        <% } else { %>
-                            <div class="cart-empty">
-                                <div class="cart-empty-icon">🛒</div>
-                                <h3>Your cart is empty</h3>
-                                <p>Looks like you haven't added any fruits yet!</p>
-                                <a href="/categories" class="btn-catalog">Start Shopping</a>
-                            </div>
-                            <% } %>
+                <% }); %>
+            <% } else { %>
+                <div class="cart-empty">
+                    <div class="cart-empty-icon">🛒</div>
+                    <h3>Your cart is empty</h3>
+                    <p>Looks like you haven't added any fruits yet!</p>
+                    <a href="/categories-page" class="btn-catalog">Start Shopping</a>
+                </div>
+            <% } %>
         </div>
 
-        <!-- Cart Summary -->
-        <% if(cartItems && cartItems.length> 0) { %>
-            <% const subtotal=cartItems.reduce((sum, item)=> sum + (item.price * item.qty), 0); %>
-                <div class="cart-summary">
-                    <h3>🧾 Order Summary</h3>
+        <!-- ==================== ORDER SUMMARY ==================== -->
+        <% if (cartItems && cartItems.length > 0) { %>
+            <div class="cart-summary">
+                <h3>🧾 Order Summary</h3>
 
-                    <% cartItems.forEach(item=> { %>
-                        <div class="cart-summary-item">
-                            <span>
-                                <%= item.name %> × <%= item.qty %>
-                            </span>
-                            <span>฿<%= (item.price * item.qty).toFixed(2) %></span>
-                        </div>
-                        <% }); %>
+                <% cartItems.forEach(function(item) { %>
+                    <%
+                        const itemSubtotal = (item.price * item.qty).toFixed(2);
+                    %>
+                    <div class="cart-summary-item">
+                        <span><%= item.name %> × <%= item.qty %></span>
+                        <span>฿<%- itemSubtotal %></span>
+                    </div>
+                <% }); %>
 
-                            <div class="cart-summary-divider"></div>
+                <div class="cart-summary-divider"></div>
 
-                            <div class="cart-summary-row">
-                                <span>Subtotal</span>
-                                <span class="subtotal-amount">฿<%= subtotal.toFixed(2) %></span>
-                            </div>
-                            <div class="cart-summary-row">
-                                <span>Shipping</span>
-                                <span style="color: var(--primary-dark); font-weight: 600;">FREE 🎉</span>
-                            </div>
-                            <div class="cart-summary-row">
-                                <span>Discount</span>
-                                <span style="color: #FF6B6B;">-฿0.00</span>
-                            </div>
-                            <div class="cart-summary-row total">
-                                <span>Total</span>
-                                <span class="total-amount">฿<%= subtotal.toFixed(2) %></span>
-                            </div>
-
-                            <button class="btn-checkout">🍉 Proceed to Checkout</button>
-                            <a href="/categories" class="btn-continue-shopping">← Continue Shopping</a>
+                <div class="cart-summary-row">
+                    <span>Subtotal</span>
+                    <span class="subtotal-amount">฿<%= subtotal.toFixed(2) %></span>
                 </div>
-                <% } %>
+                <div class="cart-summary-row">
+                    <span>Shipping</span>
+                    <span style="color: var(--primary-dark); font-weight: 600;">FREE 🎉</span>
+                </div>
+                <div class="cart-summary-row total">
+                    <span>Total</span>
+                    <span class="total-amount">฿<%= subtotal.toFixed(2) %></span>
+                </div>
+
+                <a href="/checkout-page" class="btn-checkout">🍉 Proceed to Checkout</a>
+                <a href="/categories-page" class="btn-continue-shopping">← Continue Shopping</a>
+            </div>
+        <% } %>
+
     </div>
 </div>
+
+<!-- ==================== CART JAVASCRIPT ==================== -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // ==========================================
+        // Update quantity
+        // ==========================================
+        document.querySelectorAll('.qty-minus, .qty-plus').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var fruitId = this.getAttribute('data-id');
+                var newQty = parseInt(this.getAttribute('data-qty'));
+
+                if (newQty < 1) {
+                    removeItem(fruitId);
+                    return;
+                }
+
+                fetch('/api/cart/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fruit_id: parseInt(fruitId),
+                        quantity: newQty
+                    })
+                })
+                .then(function(res) {
+                    if (res.ok) {
+                        window.location.reload();
+                    }
+                })
+                .catch(function(err) {
+                    console.error('Update error:', err);
+                });
+            });
+        });
+
+        // ==========================================
+        // Remove item
+        // ==========================================
+        document.querySelectorAll('.cart-item-remove').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var fruitId = this.getAttribute('data-id');
+                removeItem(fruitId);
+            });
+        });
+
+        function removeItem(fruitId) {
+            fetch('/api/cart/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fruit_id: parseInt(fruitId)
+                })
+            })
+            .then(function(res) {
+                if (res.ok) {
+                    window.location.reload();
+                }
+            })
+            .catch(function(err) {
+                console.error('Remove error:', err);
+            });
+        }
+
+    });
+</script>
 
 <%- include('partials/footer') %>

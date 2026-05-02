@@ -1,22 +1,35 @@
 const express = require('express');
+const router = express.Router();  // ← THIS LINE WAS MISSING!
 const controller = require('../controller/shopController');
 
-const route = express.Router();
+// ==========================================
+// AUTH PAGES
+// ==========================================
+router.get('/login-page', controller.showLoginPage);
+router.post('/login', controller.login);
+router.get('/register-page', controller.showRegisterPage);
+router.post('/register', controller.register);
+router.get('/logout', controller.logout);
 
-route.get('/', (req,res) => res.redirect('/shop-page'))
+// ==========================================
+// SHOP PAGES
+// ==========================================
+router.get('/', (req, res) => res.redirect('/shop-page'));
+router.get('/shop-page', controller.showShopPage);
+router.get('/categories-page', controller.showCategoriesPage);
+router.get('/cart-page', controller.showCartPage);
 
-route.get('/login-page', controller.showLoginPage);
-route.post('/login', controller.login);
-route.get('/register-page', controller.showRegisterPage);
-route.post('/register', controller.register);
+// ==========================================
+// CHECKOUT
+// ==========================================
+router.get('/checkout-page', controller.showCheckoutPage);
+router.post('/checkout', controller.processCheckout);
+router.get('/checkout-success', controller.showCheckoutSuccess);
 
-route.get('/shop-page', controller.showShopPage);
-//route.get('/fruit/:id', controller.showFruit);
+// ==========================================
+// CART API (called by JavaScript fetch)
+// ==========================================
+router.post('/api/cart/update', controller.updateOrAddCart);
+router.post('/api/cart/remove', controller.removeCart);
 
-route.get('/categories', controller.showCategoriesPage);
-
-route.get('/cart-page', controller.showCartPage);
-route.post('/add-cart', controller.updateOrAddCart);
-route.post('/remove-cart', controller.removeCart);
-
-module.exports = route
+module.exports = router;

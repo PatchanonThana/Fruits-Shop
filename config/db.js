@@ -8,7 +8,7 @@ const fruitsDb = new Pool({
   password: process.env.NEON_PASSWORD, 
   port: Number(process.env.NEON_PORT) || 5432,
   ssl: {
-    rejectUnauthorized: false 
+    rejectUnauthorized: false
   },
 });
 

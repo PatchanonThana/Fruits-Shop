@@ -2,19 +2,23 @@ const express = require('express');
 const app = express();
 const session = require('express-session');
 const model = require('./model/shopModel');
-
 const path = require('path');
 const { connectDb } = require('./config/db');
 const routes = require('./routes/shopeRoutes');
-
 const PORT = 3000;
-const KEY = "SECRET-KEY"
+const KEY = "SECRET-KEY";
 
 async function startServer() {
-
     await connectDb();
-    app.use(express.json());
 
+    // === 1. Body Parsers ===
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+
+    // === 2. Static Files (CSS, JS, Images) — MUST be before routes ===
+    app.use(express.static(path.join(__dirname, 'public')));
+
+    // === 3. Session ===
     app.use(session({
         secret: KEY,
         resave: false,
@@ -25,64 +29,39 @@ async function startServer() {
         }
     }));
 
-    app.use(express.urlencoded({ extended: true }));
-    
+    // === 4. Global Middleware — Pass user + cart count to ALL views ===
     app.use(async (req, res, next) => {
         try {
-            let totalItems = 0;
-            let user = req.session.user;
+            // Pass currentUser to every EJS template
+            res.locals.currentUser = req.session.user || null;
+            res.locals.cartCount = 0;
 
-            if (user) {
-                const userId = req.session.user.user_id;
-                const userCart = await model.Cart.findUserCart(userId);
-
+            // Calculate cart count if logged in
+            if (req.session.user) {
+                const userCart = await model.Cart.findUserCart(req.session.user.user_id);
                 if (userCart && Array.isArray(userCart)) {
-                    totalItems = userCart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+                    res.locals.cartCount = userCart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
                 }
             }
-
-            res.locals.cartCount = totalItems;
-            next();
-
         } catch (err) {
-            console.error("Cart Middleware Error:", err);
+            console.error("Session/Cart Middleware Error:", err);
+            res.locals.currentUser = null;
             res.locals.cartCount = 0;
-            next();
         }
+        next();
     });
-    
+
+    // === 5. View Engine ===
     app.set('view engine', 'ejs');
     app.set('views', path.join(__dirname, 'views'));
-    
-    app.use(express.static(path.join(__dirname, 'public')));
 
-    // app.use(async (req,res,next) => {
-    //     console.log('access');
-    //     try {
-    //         let totalItems = 0;
-    //         //user = req.session.user;
-    //         if (true) { //user
-    //             const userCart = await model.Cart.findUserCart(2); //user.user_id
-    //             totalItems = userCart.reduce((sum, item) => sum + item.quantity, 0);
-    //             console.log(totalItems);
-    //             res.locals.cartCount = totalItems;
-    //         }
-
-    //         next();
-    //     }
-    //     catch (err) {
-    //         res.locals.cartCount = 0;
-    //         next()
-    //     }
-    // });
-
+    // === 6. Routes — MUST be LAST ===
     app.use('/', routes);
 
+    // === 7. Start Server ===
     app.listen(PORT, () => {
-        console.log(`Fruit Shop running on http://localhost:${PORT}`);
+        console.log(`🍉 Fruit Shop running on http://localhost:${PORT}`);
     });
-
 }
 
 startServer();
-

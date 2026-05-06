@@ -202,7 +202,8 @@ exports.updateOrAddCart = async (req, res) => {
 
         const cartItem = await model.Cart.checkCart(user_id, fruit_id);
         if (cartItem) {
-            await model.Cart.updateCart(user_id, fruit_id, quantity);
+            const newQuantity = Number(cartItem.quantity) + quantity;
+            await model.Cart.updateCart(user_id, fruit_id, newQuantity);
         } else {
             await model.Cart.addCart(user_id, fruit_id, quantity);
         }

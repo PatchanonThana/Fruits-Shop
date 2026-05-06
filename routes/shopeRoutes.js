@@ -14,7 +14,7 @@ router.get('/logout', controller.logout);
 // ==========================================
 // SHOP PAGES
 // ==========================================
-router.get('/', (req, res) => res.redirect('/shop-page'));
+router.get('/', (req, res) => res.redirect('/login-page'));
 router.get('/shop-page', controller.showShopPage);
 router.get('/categories-page', controller.showCategoriesPage);
 router.get('/cart-page', controller.showCartPage);

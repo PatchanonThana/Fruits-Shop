@@ -14,7 +14,7 @@ router.get('/logout', controller.logout);
 // ==========================================
 // SHOP PAGES
 // ==========================================
-router.get('/', (req, res) => res.redirect('/shop-page'));
+router.get('/', (req, res) => res.redirect('/login-page'));
 router.get('/shop-page', controller.showShopPage);
 router.get('/categories-page', controller.showCategoriesPage);
 router.get('/cart-page', controller.showCartPage);
@@ -31,5 +31,10 @@ router.get('/checkout-success', controller.showCheckoutSuccess);
 // ==========================================
 router.post('/api/cart/update', controller.updateOrAddCart);
 router.post('/api/cart/remove', controller.removeCart);
+
+// ==========================================
+// ADMIN API
+// ==========================================
+router.post('/api/admin/fruit/price', controller.updateFruitPrice);
 
 module.exports = router;

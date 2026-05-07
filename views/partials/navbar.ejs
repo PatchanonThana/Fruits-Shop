@@ -7,8 +7,11 @@
     </div>
 
     <ul class="nav-links">
-        <li><a href="/shop-page" class="<%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>">Home</a></li>
-        <li><a href="/categories-page" class="<%= typeof activePage !== 'undefined' && activePage === 'categories' ? 'active' : '' %>">Categories</a></li>
+        <li><a href="/shop-page"
+                class="<%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>">Home</a></li>
+        <li><a href="/categories-page"
+                class="<%= typeof activePage !== 'undefined' && activePage === 'categories' ? 'active' : '' %>">Categories</a>
+        </li>
         <li><a href="/shop-page#bestsellers">Bestsellers</a></li>
         <li><a href="/shop-page#juice">Juice</a></li>
         <li><a href="/shop-page#treats">Treats</a></li>
@@ -16,57 +19,62 @@
     </ul>
 
     <div class="nav-right">
-        <%
-            // Only define user ONCE
-            const navUser = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : null;
-            const navCartCount = (typeof cartCount !== 'undefined') ? cartCount : 0;
-        %>
+        <% var navUser=(typeof currentUser !=='undefined' && currentUser) ? currentUser : null; var navCartCount=(typeof
+            cartCount !=='undefined' ) ? cartCount : 0; %>
 
-        <!-- Cart icon -->
-        <a href="/cart-page" class="nav-cart" title="Shopping Cart">
-            <img src="/images/cart.svg" alt="Cart">
-            <span class="cart-badge"><%- navCartCount %></span>
-        </a>
-
-        <% if (navUser) { %>
-            <!-- ========== LOGGED IN ========== -->
-            <div class="user-menu">
-                <button class="btn-user-menu" type="button" onclick="this.parentElement.classList.toggle('open')">
-                    <div class="user-avatar">
-                        <%= navUser.email.charAt(0).toUpperCase() %>
-                    </div>
-                    <span class="user-name"><%= navUser.email.split('@') %></span>
-                    <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </button>
-                <div class="user-dropdown">
-                    <div class="dropdown-header">
-                        <strong><%= navUser.email.split('@') %></strong>
-                        <small><%= navUser.email %></small>
-                    </div>
-                    <div class="dropdown-divider"></div>
-                    <a href="/cart-page" class="dropdown-item">🛒 My Cart</a>
-                    <a href="/categories-page" class="dropdown-item">🍉 Browse Fruits</a>
-                    <div class="dropdown-divider"></div>
-                    <a href="/logout" class="dropdown-item dropdown-logout">🚪 Logout</a>
-                </div>
-            </div>
-        <% } else { %>
-            <!-- ========== NOT LOGGED IN ========== -->
-            <a href="/login-page" class="btn-login">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                Login
+            <!-- Cart icon -->
+            <a href="/cart-page" class="nav-cart" title="Shopping Cart">
+                <img src="/images/cart.svg" alt="Cart">
+                <span class="cart-badge"><%- navCartCount %></span>
             </a>
-        <% } %>
 
-        <div class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
+            <% if (navUser) { %>
+                <!-- ========== LOGGED IN ========== -->
+                <div class="user-menu">
+                    <button class="btn-user-menu" type="button" onclick="this.parentElement.classList.toggle('open')">
+                        <div class="user-avatar">
+                            <%= navUser.email.charAt(0).toUpperCase() %>
+                        </div>
+                        <span class="user-name">
+                            <%= navUser.email.split('@')[0] %>
+                        </span>
+                        <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div class="user-dropdown">
+                        <div class="dropdown-header">
+                            <strong>
+                                <%= navUser.email.split('@')[0] %>
+                            </strong>
+                            <small>
+                                <%= navUser.email %>
+                            </small>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="/cart-page" class="dropdown-item">🛒 My Cart</a>
+                        <a href="/categories-page" class="dropdown-item">🍉 Browse Fruits</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout" class="dropdown-item dropdown-logout">🚪 Logout</a>
+                    </div>
+                </div>
+                <% } else { %>
+                    <!-- ========== NOT LOGGED IN ========== -->
+                    <a href="/login-page" class="btn-login">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        Login
+                    </a>
+                    <% } %>
+
+                        <div class="hamburger">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
     </div>
 </nav>

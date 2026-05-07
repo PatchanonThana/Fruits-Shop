@@ -1,316 +1,342 @@
 // ============================================
-// FRUIT SHOP - Main JavaScript (FIXED)
+// FRUIT SHOP - Main JavaScript
 // ============================================
 
-document.addEventListener('DOMContentLoaded', function() {
+const isPositiveInteger = (value) => {
+    const number = Number(value);
+    return Number.isInteger(number) && number > 0;
+};
 
-    // ============================================
-    // NAVBAR — Scroll effect
-    // ============================================
-    var navbar = document.querySelector('.navbar');
-    if (navbar) {
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
+const safeParseInt = (value) => {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) ? parsed : NaN;
+};
+
+const postJson = async (url, data) => {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (response.redirected) {
+            window.location.href = response.url;
+            return null;
+        }
+
+        const json = await response.json();
+
+        if (!response.ok) {
+            console.error('API error:', response.status, json);
+            return { error: json.error || 'API Error', status: response.status };
+        }
+
+        return json;
+    } catch (err) {
+        console.error('Network error:', err);
+        return { error: 'Network error', status: 0 };
+    }
+};
+
+const updateBadge = (count) => {
+    const badge = document.querySelector('.cart-badge');
+    if (!badge) return;
+    badge.textContent = count;
+    badge.style.transform = 'scale(1.25)';
+    setTimeout(() => {
+        badge.style.transform = 'scale(1)';
+    }, 150);
+};
+
+const animateButton = (button, message) => {
+    if (!button) return;
+    const original = button.innerHTML;
+    button.innerHTML = message;
+    button.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+        button.innerHTML = original;
+        button.style.transform = 'scale(1)';
+    }, 900);
+};
+
+const removeCartItem = async (fruitId) => {
+    if (!isPositiveInteger(fruitId)) {
+        console.error('Invalid fruit ID for removal:', fruitId);
+        alert('Error: Invalid fruit ID');
+        return;
+    }
+
+    const data = await postJson('/api/cart/remove', { fruit_id: fruitId });
+    if (!data || data.error) {
+        console.error('Failed to remove item:', data ? data.error : 'No response');
+        alert('Error: Unable to remove item from cart');
+        return;
+    }
+
+    updateBadge(data.cartCount || 0);
+    window.location.reload();
+};
+
+const bindCartButtons = () => {
+    document.querySelectorAll('.btn-add-cart').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const fruitId = safeParseInt(btn.getAttribute('data-fruit-id'));
+            if (!isPositiveInteger(fruitId)) {
+                console.error('Missing or invalid fruit ID on add-cart button');
+                alert('Error: Invalid fruit');
+                return;
+            }
+
+            btn.disabled = true;
+            animateButton(btn, '⏳');
+
+            const result = await postJson('/api/cart/update', {
+                fruit_id: fruitId,
+                quantity: 1
+            });
+
+            btn.disabled = false;
+
+            if (result && result.error) {
+                console.error('Cart error:', result.error);
+                animateButton(btn, '❌');
+                return;
+            }
+
+            if (result && typeof result.cartCount === 'number') {
+                updateBadge(result.cartCount);
+                animateButton(btn, '✅');
             } else {
-                navbar.classList.remove('scrolled');
+                animateButton(btn, '❌');
             }
         });
-    }
+    });
+};
 
-    // ============================================
-    // HAMBURGER — Mobile menu toggle
-    // ============================================
-    var hamburger = document.querySelector('.hamburger');
-    var navLinks = document.querySelector('.nav-links');
-    if (hamburger && navLinks) {
-        hamburger.addEventListener('click', function() {
-            navLinks.classList.toggle('open');
-            hamburger.classList.toggle('active');
-        });
+const bindQuantityControls = () => {
+    document.querySelectorAll('.qty-minus, .qty-plus').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+            const fruitId = safeParseInt(btn.getAttribute('data-id'));
+            const quantity = safeParseInt(btn.getAttribute('data-qty'));
 
-        navLinks.querySelectorAll('a').forEach(function(link) {
-            link.addEventListener('click', function() {
-                navLinks.classList.remove('open');
-                hamburger.classList.remove('active');
+            if (!isPositiveInteger(fruitId) || !isPositiveInteger(quantity)) {
+                console.error('Invalid cart update values', fruitId, quantity);
+                return;
+            }
+
+            if (quantity < 1) {
+                removeCartItem(fruitId);
+                return;
+            }
+
+            await postJson('/api/cart/update', {
+                fruit_id: fruitId,
+                quantity: quantity
             });
+
+            window.location.reload();
         });
+    });
+};
+
+const bindRemoveButtons = () => {
+    document.querySelectorAll('.cart-item-remove').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const fruitId = safeParseInt(btn.getAttribute('data-id'));
+            if (!isPositiveInteger(fruitId)) {
+                console.error('Invalid fruit ID to remove', fruitId);
+                return;
+            }
+            removeCartItem(fruitId);
+        });
+    });
+};
+
+const bindAdminPriceButtons = () => {
+    document.querySelectorAll('.btn-update-price').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+            const fruitId = safeParseInt(btn.getAttribute('data-fruit-id'));
+            const input = document.querySelector(`.admin-price-input[data-fruit-id="${fruitId}"]`);
+            if (!isPositiveInteger(fruitId) || !input) {
+                console.error('Invalid admin price control', fruitId);
+                alert('Error: Invalid fruit ID.');
+                return;
+            }
+
+            const price = parseFloat(input.value);
+            if (Number.isNaN(price) || price <= 0) {
+                alert('Please enter a valid price greater than 0.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+
+            const result = await postJson('/api/admin/fruit/price', {
+                fruit_id: fruitId,
+                price: price
+            });
+
+            if (result && result.error) {
+                alert('Error: ' + result.error);
+                btn.textContent = 'Save price';
+                btn.disabled = false;
+                return;
+            }
+
+            if (result && result.fruit && typeof result.fruit.price === 'number') {
+                const priceLabel = btn.closest('.product-card').querySelector('.product-price');
+                if (priceLabel) {
+                    priceLabel.textContent = '฿' + result.fruit.price.toFixed(2);
+                    input.value = result.fruit.price.toFixed(2);
+                }
+                btn.textContent = '✅ Saved';
+                setTimeout(() => {
+                    btn.textContent = 'Save price';
+                    btn.disabled = false;
+                }, 1500);
+            } else {
+                alert('Error: Invalid response from server');
+                btn.textContent = 'Save price';
+                btn.disabled = false;
+            }
+        });
+    });
+};
+
+const updateCartTotal = () => {
+    const items = document.querySelectorAll('.cart-item');
+    let subtotal = 0;
+
+    items.forEach((item) => {
+        const price = Number(item.getAttribute('data-price') || 0);
+        const qtyEl = item.querySelector('.cart-qty span');
+        const qty = safeParseInt(qtyEl ? qtyEl.textContent : 1) || 1;
+        subtotal += price * qty;
+    });
+
+    const subtotalEl = document.querySelector('.subtotal-amount');
+    const totalEl = document.querySelector('.total-amount');
+    if (subtotalEl) subtotalEl.textContent = '฿' + subtotal.toFixed(2);
+    if (totalEl) totalEl.textContent = '฿' + subtotal.toFixed(2);
+};
+
+const setupNavigation = () => {
+    const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+};
+
+const setupMobileMenu = () => {
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (!hamburger || !navLinks) {
+        return;
     }
 
-    // ============================================
-    // SCROLL ANIMATIONS
-    // ============================================
-    var observerOptions = {
+    hamburger.addEventListener('click', () => {
+        navLinks.classList.toggle('open');
+        hamburger.classList.toggle('active');
+    });
+
+    navLinks.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => {
+            navLinks.classList.remove('open');
+            hamburger.classList.remove('active');
+        });
+    });
+};
+
+const setupAnimations = () => {
+    const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
     };
 
-    var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                var children = entry.target.querySelectorAll('.animate-child');
-                children.forEach(function(child, index) {
-                    child.style.transitionDelay = (index * 0.1) + 's';
-                    child.classList.add('visible');
-                });
-            }
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('visible');
+            const children = entry.target.querySelectorAll('.animate-child');
+            children.forEach((child, index) => {
+                child.style.transitionDelay = (index * 0.1) + 's';
+                child.classList.add('visible');
+            });
         });
     }, observerOptions);
 
-    document.querySelectorAll('.animate-in').forEach(function(el) {
-        observer.observe(el);
-    });
+    document.querySelectorAll('.animate-in').forEach((el) => observer.observe(el));
+};
 
-    // ============================================
-    // WISHLIST TOGGLE
-    // ============================================
-    document.querySelectorAll('.product-wishlist').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
+const setupWishlist = () => {
+    document.querySelectorAll('.product-wishlist').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            var isActive = btn.classList.toggle('active');
+            const isActive = btn.classList.toggle('active');
             btn.innerHTML = isActive ? '❤️' : '🤍';
             btn.style.transform = 'scale(1.3)';
-            setTimeout(function() {
+            setTimeout(() => {
                 btn.style.transform = 'scale(1)';
             }, 200);
         });
     });
+};
 
-    // ============================================
-    // USER DROPDOWN — Toggle + Close on outside click
-    // ============================================
-    document.addEventListener('click', function(e) {
-        var userMenu = document.querySelector('.user-menu');
+const setupUserMenu = () => {
+    document.addEventListener('click', (e) => {
+        const userMenu = document.querySelector('.user-menu');
         if (userMenu && !userMenu.contains(e.target)) {
             userMenu.classList.remove('open');
         }
     });
 
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            var userMenu = document.querySelector('.user-menu');
+            const userMenu = document.querySelector('.user-menu');
             if (userMenu) {
                 userMenu.classList.remove('open');
             }
         }
     });
+};
 
-    // ============================================
-    // ADD TO CART — From product cards
-    // ============================================
-    document.querySelectorAll('.btn-add-cart').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            var fruitId = btn.getAttribute('data-fruit-id');
-
-            console.log('Adding to cart, fruit_id:', fruitId);
-
-            if (!fruitId) {
-                console.error('No fruit ID found on button!');
-                return;
-            }
-
-            // Floating cart animation
-            var rect = btn.getBoundingClientRect();
-            var floater = document.createElement('div');
-            floater.innerHTML = '🛒';
-            floater.style.cssText =
-                'position:fixed;' +
-                'top:' + rect.top + 'px;' +
-                'left:' + rect.left + 'px;' +
-                'font-size:1.5rem;' +
-                'z-index:9999;' +
-                'pointer-events:none;' +
-                'transition:all 0.8s cubic-bezier(0.2,0,0.2,1);';
-            document.body.appendChild(floater);
-
-            var cartIcon = document.querySelector('.nav-cart');
-            if (cartIcon) {
-                var cartRect = cartIcon.getBoundingClientRect();
-                requestAnimationFrame(function() {
-                    floater.style.top = cartRect.top + 'px';
-                    floater.style.left = cartRect.left + 'px';
-                    floater.style.opacity = '0';
-                    floater.style.transform = 'scale(0.3)';
-                });
-            }
-            setTimeout(function() { floater.remove(); }, 900);
-
-            // ✅ CORRECT API URL
-            fetch('/api/cart/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fruit_id: parseInt(fruitId),
-                    quantity: 1
-                })
-            })
-            .then(function(res) {
-                if (res.redirected) {
-                    window.location.href = '/login-page?notLoginYet=1';
-                    return null;
-                }
-                return res.json();
-            })
-            .then(function(data) {
-                if (data) {
-                    console.log('Cart updated:', data);
-
-                    // Update badge number
-                    var badge = document.querySelector('.cart-badge');
-                    if (badge && data.cartCount !== undefined) {
-                        badge.textContent = data.cartCount;
-                        badge.style.transform = 'scale(1.4)';
-                        setTimeout(function() {
-                            badge.style.transform = 'scale(1)';
-                        }, 200);
-                    }
-
-                    // Button success feedback
-                    var originalHTML = btn.innerHTML;
-                    btn.innerHTML = '✅';
-                    setTimeout(function() {
-                        btn.innerHTML = originalHTML;
-                    }, 1000);
-                }
-            })
-            .catch(function(err) {
-                console.error('Add to cart error:', err);
-            });
-
-            // Button press effect
-            btn.style.transform = 'scale(0.85)';
-            setTimeout(function() {
-                btn.style.transform = 'scale(1)';
-            }, 150);
-        });
-    });
-
-    // ============================================
-    // CART PAGE — Quantity +/- buttons
-    // ============================================
-    document.querySelectorAll('.qty-minus, .qty-plus').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var fruitId = this.getAttribute('data-id');
-            var newQty = parseInt(this.getAttribute('data-qty'));
-
-            console.log('Update cart, fruit_id:', fruitId, 'new qty:', newQty);
-
-            if (newQty < 1) {
-                removeCartItem(fruitId);
-                return;
-            }
-
-            // ✅ CORRECT API URL
-            fetch('/api/cart/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fruit_id: parseInt(fruitId),
-                    quantity: newQty
-                })
-            })
-            .then(function(res) {
-                if (res.ok) {
-                    window.location.reload();
-                }
-            })
-            .catch(function(err) {
-                console.error('Update error:', err);
-            });
-        });
-    });
-
-    // ============================================
-    // CART PAGE — Remove item
-    // ============================================
-    document.querySelectorAll('.cart-item-remove').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var fruitId = this.getAttribute('data-id');
-            removeCartItem(fruitId);
-        });
-    });
-
-    function removeCartItem(fruitId) {
-        console.log('Removing from cart, fruit_id:', fruitId);
-
-        // ✅ CORRECT API URL
-        fetch('/api/cart/remove', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                fruit_id: parseInt(fruitId)
-            })
-        })
-        .then(function(res) {
-            if (res.ok) {
-                return res.json();
-            }
-        })
-        .then(function(data) {
-            if (data) {
-                console.log('Removed:', data);
-
-                // Update badge
-                var badge = document.querySelector('.cart-badge');
-                if (badge && data.cartCount !== undefined) {
-                    badge.textContent = data.cartCount;
-                }
-
-                // Reload to refresh the cart page
-                window.location.reload();
-            }
-        })
-        .catch(function(err) {
-            console.error('Remove error:', err);
-        });
-    }
-
-    // ============================================
-    // CART PAGE — Update totals
-    // ============================================
-    function updateCartTotal() {
-        var items = document.querySelectorAll('.cart-item');
-        var subtotal = 0;
-
-        items.forEach(function(item) {
-            var price = parseFloat(item.getAttribute('data-price') || 0);
-            var qtyEl = item.querySelector('.cart-qty span');
-            var qty = qtyEl ? parseInt(qtyEl.textContent) : 1;
-            subtotal += price * qty;
-        });
-
-        var subtotalEl = document.querySelector('.subtotal-amount');
-        var totalEl = document.querySelector('.total-amount');
-        if (subtotalEl) subtotalEl.textContent = '฿' + subtotal.toFixed(2);
-        if (totalEl) totalEl.textContent = '฿' + subtotal.toFixed(2);
-    }
-
-    // ============================================
-    // Page load
-    // ============================================
+const setupBodyFade = () => {
     document.body.style.opacity = '0';
-    document.body.style.transition = 'opacity 0.5s ease';
-    requestAnimationFrame(function() {
+    document.body.style.transition = 'opacity 0.35s ease';
+    requestAnimationFrame(() => {
         document.body.style.opacity = '1';
     });
+};
 
-    // ============================================
-    // HERO — Subtle parallax
-    // ============================================
-    var hero = document.querySelector('.hero');
-    if (hero) {
-        window.addEventListener('scroll', function() {
-            var scrolled = window.scrollY;
-            var banner = hero.querySelector('.hero-banner');
-            if (banner && scrolled < window.innerHeight) {
-                banner.style.transform = 'translateY(' + (scrolled * 0.3) + 'px)';
-            }
-        });
-    }
+const init = () => {
+    setupNavigation();
+    setupMobileMenu();
+    setupAnimations();
+    setupWishlist();
+    setupUserMenu();
+    setupBodyFade();
+    bindCartButtons();
+    bindQuantityControls();
+    bindRemoveButtons();
+    bindAdminPriceButtons();
+    updateCartTotal();
+    console.log('🍉 Fruit Shop loaded!');
+};
 
-    console.log('🍉 Fruit Shop loaded! Fresh fruits await you!');
-});
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}

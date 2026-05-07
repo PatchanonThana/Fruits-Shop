@@ -32,4 +32,9 @@ router.get('/checkout-success', controller.showCheckoutSuccess);
 router.post('/api/cart/update', controller.updateOrAddCart);
 router.post('/api/cart/remove', controller.removeCart);
 
+// ==========================================
+// ADMIN API
+// ==========================================
+router.post('/api/admin/fruit/price', controller.updateFruitPrice);
+
 module.exports = router;

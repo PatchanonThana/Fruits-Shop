@@ -74,9 +74,19 @@ body::before {
 }
 
 @keyframes floatBubbles {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    33% { transform: translate(30px, -30px) rotate(5deg); }
-    66% { transform: translate(-20px, 20px) rotate(-3deg); }
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    33% {
+        transform: translate(30px, -30px) rotate(5deg);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) rotate(-3deg);
+    }
 }
 
 a {
@@ -90,7 +100,11 @@ img {
     height: auto;
 }
 
-h1, h2, h3, h4, h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
     font-family: var(--font-heading);
 }
 
@@ -323,12 +337,10 @@ h1, h2, h3, h4, h5 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.3) 0%,
-        rgba(255, 255, 255, 0.05) 50%,
-        rgba(76, 175, 80, 0.1) 100%
-    );
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.3) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            rgba(76, 175, 80, 0.1) 100%);
 }
 
 .hero-content {
@@ -384,7 +396,7 @@ h1, h2, h3, h4, h5 {
     position: absolute;
     z-index: 1;
     animation: heroFloat 6s ease-in-out infinite;
-    filter: drop-shadow(0 10px 30px rgba(0,0,0,0.15));
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.15));
 }
 
 .hero-float:nth-child(1) {
@@ -416,8 +428,15 @@ h1, h2, h3, h4, h5 {
 }
 
 @keyframes heroFloat {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(10deg); }
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(10deg);
+    }
 }
 
 /* === SECTION COMMON === */
@@ -808,11 +827,25 @@ h1, h2, h3, h4, h5 {
 }
 
 /* Category bar colors */
-.cat-all { background: linear-gradient(135deg, rgba(126, 200, 227, 0.4), rgba(126, 200, 227, 0.2)); }
-.cat-sweet { background: linear-gradient(135deg, rgba(255, 181, 194, 0.4), rgba(255, 181, 194, 0.2)); }
-.cat-sour { background: linear-gradient(135deg, rgba(184, 233, 134, 0.4), rgba(184, 233, 134, 0.2)); }
-.cat-healthy { background: linear-gradient(135deg, rgba(126, 200, 227, 0.4), rgba(173, 216, 230, 0.2)); }
-.cat-juice { background: linear-gradient(135deg, rgba(255, 224, 102, 0.4), rgba(255, 224, 102, 0.2)); }
+.cat-all {
+    background: linear-gradient(135deg, rgba(126, 200, 227, 0.4), rgba(126, 200, 227, 0.2));
+}
+
+.cat-sweet {
+    background: linear-gradient(135deg, rgba(255, 181, 194, 0.4), rgba(255, 181, 194, 0.2));
+}
+
+.cat-sour {
+    background: linear-gradient(135deg, rgba(184, 233, 134, 0.4), rgba(184, 233, 134, 0.2));
+}
+
+.cat-healthy {
+    background: linear-gradient(135deg, rgba(126, 200, 227, 0.4), rgba(173, 216, 230, 0.2));
+}
+
+.cat-juice {
+    background: linear-gradient(135deg, rgba(255, 224, 102, 0.4), rgba(255, 224, 102, 0.2));
+}
 
 /* === FOOTER === */
 .footer {
@@ -1504,8 +1537,15 @@ h1, h2, h3, h4, h5 {
 }
 
 @keyframes leafFloat {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-15px) rotate(15deg); }
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-15px) rotate(15deg);
+    }
 }
 
 /* === SCROLLBAR === */
@@ -1532,6 +1572,7 @@ h1, h2, h3, h4, h5 {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1632,7 +1673,8 @@ h1, h2, h3, h4, h5 {
         padding: 50px 20px;
     }
 
-    .juice-section, .categories-section {
+    .juice-section,
+    .categories-section {
         padding: 50px 20px;
     }
 
@@ -1716,6 +1758,7 @@ h1, h2, h3, h4, h5 {
         gap: 12px;
     }
 }
+
 /* ============================================
    ADDITIONAL STYLES - Updated Version
    Add these BELOW your existing style.css
@@ -1964,24 +2007,60 @@ a.category-tab {
     animation: fadeInUp 0.5s ease both;
 }
 
-.products-grid .product-card:nth-child(1) { animation-delay: 0.02s; }
-.products-grid .product-card:nth-child(2) { animation-delay: 0.04s; }
-.products-grid .product-card:nth-child(3) { animation-delay: 0.06s; }
-.products-grid .product-card:nth-child(4) { animation-delay: 0.08s; }
-.products-grid .product-card:nth-child(5) { animation-delay: 0.10s; }
-.products-grid .product-card:nth-child(6) { animation-delay: 0.12s; }
-.products-grid .product-card:nth-child(7) { animation-delay: 0.14s; }
-.products-grid .product-card:nth-child(8) { animation-delay: 0.16s; }
-.products-grid .product-card:nth-child(9) { animation-delay: 0.18s; }
-.products-grid .product-card:nth-child(10) { animation-delay: 0.20s; }
-.products-grid .product-card:nth-child(11) { animation-delay: 0.22s; }
-.products-grid .product-card:nth-child(12) { animation-delay: 0.24s; }
+.products-grid .product-card:nth-child(1) {
+    animation-delay: 0.02s;
+}
+
+.products-grid .product-card:nth-child(2) {
+    animation-delay: 0.04s;
+}
+
+.products-grid .product-card:nth-child(3) {
+    animation-delay: 0.06s;
+}
+
+.products-grid .product-card:nth-child(4) {
+    animation-delay: 0.08s;
+}
+
+.products-grid .product-card:nth-child(5) {
+    animation-delay: 0.10s;
+}
+
+.products-grid .product-card:nth-child(6) {
+    animation-delay: 0.12s;
+}
+
+.products-grid .product-card:nth-child(7) {
+    animation-delay: 0.14s;
+}
+
+.products-grid .product-card:nth-child(8) {
+    animation-delay: 0.16s;
+}
+
+.products-grid .product-card:nth-child(9) {
+    animation-delay: 0.18s;
+}
+
+.products-grid .product-card:nth-child(10) {
+    animation-delay: 0.20s;
+}
+
+.products-grid .product-card:nth-child(11) {
+    animation-delay: 0.22s;
+}
+
+.products-grid .product-card:nth-child(12) {
+    animation-delay: 0.24s;
+}
 
 @keyframes fadeInUp {
     from {
         opacity: 0;
         transform: translateY(25px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -2035,6 +2114,7 @@ a.category-tab {
         height: 60px;
     }
 }
+
 .banner-emoji {
     font-size: 3.5rem;
     margin-bottom: 10px;
@@ -2109,7 +2189,7 @@ a.category-tab {
     transition: var(--transition);
 }
 
-.payment-option input:checked + .payment-option-content {
+.payment-option input:checked+.payment-option-content {
     border-color: var(--primary);
     background: rgba(76, 175, 80, 0.08);
     box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
@@ -2329,9 +2409,19 @@ a.category-tab {
 }
 
 @keyframes successPop {
-    0% { transform: scale(0); opacity: 0; }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .success-details {
@@ -2566,4 +2656,69 @@ a.btn-checkout:hover {
 .dropdown-logout:hover {
     background: rgba(231, 76, 60, 0.08);
     color: #c0392b;
+}
+
+/* ============================================
+   ADMIN PRICE CONTROLS
+   ============================================ */
+
+.product-price-admin {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.admin-price-input {
+    flex: 1 1 160px;
+    min-width: 0;
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid var(--primary-light);
+    border-radius: 8px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    background: rgba(76, 175, 80, 0.05);
+    transition: var(--transition);
+}
+
+.admin-price-input:focus {
+    outline: none;
+    border-color: var(--primary-dark);
+    background: rgba(76, 175, 80, 0.1);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.btn-update-price {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4CAF50, #66BB6A);
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.btn-update-price:hover:not(:disabled) {
+    background: linear-gradient(135deg, #388E3C, #4CAF50);
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-update-price:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-update-price:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }

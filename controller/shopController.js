@@ -7,9 +7,22 @@ const isPositiveInteger = (value) => {
 
 const requireLogin = (req, res) => {
     if (!req.session.user) {
-        return res.redirect('/login-page?notLoginYet=1');
+        res.redirect('/login-page?notLoginYet=1');
+        return true;
     }
-    return null;
+    return false;
+};
+
+const requireAdminApi = (req, res) => {
+    if (!req.session.user) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return true;
+    }
+    if (req.session.user.role !== 'ADMIN') {
+        res.status(403).json({ error: 'Forbidden' });
+        return true;
+    }
+    return false;
 };
 
 exports.showLoginPage = (req, res) => {
@@ -126,7 +139,7 @@ exports.getBestSeller = (allFruits) => {
 
 exports.showShopPage = async (req, res) => {
     if (requireLogin(req, res)) {
-        return null;
+        return;
     }
 
     const categories = await model.Fruit.findAllCategories();
@@ -138,7 +151,7 @@ exports.showShopPage = async (req, res) => {
 
 exports.showCategoriesPage = async (req, res) => {
     if (requireLogin(req, res)) {
-        return null;
+        return;
     }
 
     const activeCategory = req.query.cat || 'all';
@@ -153,7 +166,7 @@ exports.showCategoriesPage = async (req, res) => {
 
 exports.showCartPage = async (req, res) => {
     if (requireLogin(req, res)) {
-        return null;
+        return;
     }
 
     const user = req.session.user;
@@ -184,7 +197,7 @@ exports.showCartPage = async (req, res) => {
 exports.updateOrAddCart = async (req, res) => {
     try {
         if (requireLogin(req, res)) {
-            return null;
+            return;
         }
 
         const user_id = req.session.user.user_id;
@@ -219,10 +232,40 @@ exports.updateOrAddCart = async (req, res) => {
     }
 };
 
+exports.updateFruitPrice = async (req, res) => {
+    try {
+        if (requireAdminApi(req, res)) {
+            return;
+        }
+
+        const fruit_id = parseInt(req.body.fruit_id, 10);
+        const price = Number(req.body.price);
+
+        if (!isPositiveInteger(fruit_id) || typeof price !== 'number' || Number.isNaN(price) || price <= 0) {
+            return res.status(400).json({ error: 'Invalid fruit_id or price' });
+        }
+
+        const fruit = await model.Fruit.findFruitById(fruit_id);
+        if (!fruit) {
+            return res.status(404).json({ error: 'Fruit not found' });
+        }
+
+        const updated = await model.Fruit.updateFruitPrice(fruit_id, price);
+        if (!updated) {
+            return res.status(500).json({ error: 'Unable to update price' });
+        }
+
+        return res.json({ message: 'Price updated', fruit: updated });
+    } catch (err) {
+        console.error('Admin price update error:', err);
+        return res.status(500).json({ error: 'Unable to update price' });
+    }
+};
+
 exports.removeCart = async (req, res) => {
     try {
         if (requireLogin(req, res)) {
-            return null;
+            return;
         }
 
         const user_id = req.session.user.user_id;
@@ -246,7 +289,7 @@ exports.removeCart = async (req, res) => {
 
 exports.showCheckoutPage = async (req, res) => {
     if (requireLogin(req, res)) {
-        return null;
+        return;
     }
 
     const user = req.session.user;
@@ -293,7 +336,7 @@ exports.showCheckoutPage = async (req, res) => {
 
 exports.processCheckout = async (req, res) => {
     if (requireLogin(req, res)) {
-        return null;
+        return;
     }
 
     try {
@@ -333,7 +376,7 @@ exports.processCheckout = async (req, res) => {
 
 exports.showCheckoutSuccess = (req, res) => {
     if (requireLogin(req, res)) {
-        return null;
+        return;
     }
     return res.render('checkout-success', { activePage: 'checkout' });
 };

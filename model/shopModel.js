@@ -33,6 +33,19 @@ const Fruit = {
             [fruit_id]
         );
         return fruit.rows[0] || null;
+    },
+
+    updateFruitPrice: async (fruit_id, price) => {
+        const updated = await fruitsDb.query(
+            `
+            UPDATE fruits
+            SET price = $2
+            WHERE fruit_id = $1
+            RETURNING fruit_id, price;
+            `,
+            [fruit_id, price]
+        );
+        return updated.rows[0] || null;
     }
 };
 

@@ -13,18 +13,30 @@ const safeParseInt = (value) => {
 };
 
 const postJson = async (url, data) => {
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
 
-    if (response.redirected) {
-        window.location.href = response.url;
-        return null;
+        if (response.redirected) {
+            window.location.href = response.url;
+            return null;
+        }
+
+        const json = await response.json();
+
+        if (!response.ok) {
+            console.error('API error:', response.status, json);
+            return { error: json.error || 'API Error', status: response.status };
+        }
+
+        return json;
+    } catch (err) {
+        console.error('Network error:', err);
+        return { error: 'Network error', status: 0 };
     }
-
-    return response.json();
 };
 
 const updateBadge = (count) => {
@@ -51,13 +63,18 @@ const animateButton = (button, message) => {
 const removeCartItem = async (fruitId) => {
     if (!isPositiveInteger(fruitId)) {
         console.error('Invalid fruit ID for removal:', fruitId);
+        alert('Error: Invalid fruit ID');
         return;
     }
 
     const data = await postJson('/api/cart/remove', { fruit_id: fruitId });
-    if (!data) return;
+    if (!data || data.error) {
+        console.error('Failed to remove item:', data ? data.error : 'No response');
+        alert('Error: Unable to remove item from cart');
+        return;
+    }
 
-    updateBadge(data.cartCount);
+    updateBadge(data.cartCount || 0);
     window.location.reload();
 };
 
@@ -70,18 +87,31 @@ const bindCartButtons = () => {
             const fruitId = safeParseInt(btn.getAttribute('data-fruit-id'));
             if (!isPositiveInteger(fruitId)) {
                 console.error('Missing or invalid fruit ID on add-cart button');
+                alert('Error: Invalid fruit');
                 return;
             }
 
-            animateButton(btn, '✅');
+            btn.disabled = true;
+            animateButton(btn, '⏳');
 
             const result = await postJson('/api/cart/update', {
                 fruit_id: fruitId,
                 quantity: 1
             });
 
+            btn.disabled = false;
+
+            if (result && result.error) {
+                console.error('Cart error:', result.error);
+                animateButton(btn, '❌');
+                return;
+            }
+
             if (result && typeof result.cartCount === 'number') {
                 updateBadge(result.cartCount);
+                animateButton(btn, '✅');
+            } else {
+                animateButton(btn, '❌');
             }
         });
     });
@@ -122,6 +152,58 @@ const bindRemoveButtons = () => {
                 return;
             }
             removeCartItem(fruitId);
+        });
+    });
+};
+
+const bindAdminPriceButtons = () => {
+    document.querySelectorAll('.btn-update-price').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+            const fruitId = safeParseInt(btn.getAttribute('data-fruit-id'));
+            const input = document.querySelector(`.admin-price-input[data-fruit-id="${fruitId}"]`);
+            if (!isPositiveInteger(fruitId) || !input) {
+                console.error('Invalid admin price control', fruitId);
+                alert('Error: Invalid fruit ID.');
+                return;
+            }
+
+            const price = parseFloat(input.value);
+            if (Number.isNaN(price) || price <= 0) {
+                alert('Please enter a valid price greater than 0.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+
+            const result = await postJson('/api/admin/fruit/price', {
+                fruit_id: fruitId,
+                price: price
+            });
+
+            if (result && result.error) {
+                alert('Error: ' + result.error);
+                btn.textContent = 'Save price';
+                btn.disabled = false;
+                return;
+            }
+
+            if (result && result.fruit && typeof result.fruit.price === 'number') {
+                const priceLabel = btn.closest('.product-card').querySelector('.product-price');
+                if (priceLabel) {
+                    priceLabel.textContent = '฿' + result.fruit.price.toFixed(2);
+                    input.value = result.fruit.price.toFixed(2);
+                }
+                btn.textContent = '✅ Saved';
+                setTimeout(() => {
+                    btn.textContent = 'Save price';
+                    btn.disabled = false;
+                }, 1500);
+            } else {
+                alert('Error: Invalid response from server');
+                btn.textContent = 'Save price';
+                btn.disabled = false;
+            }
         });
     });
 };
@@ -248,6 +330,7 @@ const init = () => {
     bindCartButtons();
     bindQuantityControls();
     bindRemoveButtons();
+    bindAdminPriceButtons();
     updateCartTotal();
     console.log('🍉 Fruit Shop loaded!');
 };

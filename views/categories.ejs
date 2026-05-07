@@ -102,7 +102,7 @@
                                         <% if (typeof currentUser !=='undefined' && currentUser &&
                                             currentUser.role==='ADMIN' ) { %>
                                             <div class="product-price-admin">
-                                                <input type="number" min="0.01" step="0.01" value="<%= fruit.price %>"
+                                                <input type="number" min="1" step="1" value="<%= fruit.price %>"
                                                     class="admin-price-input" data-fruit-id="<%- fruitId %>">
                                                 <button class="btn-update-price" data-fruit-id="<%- fruitId %>">Save
                                                     price</button>
